@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+        display: ["Space Grotesk", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +61,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        biofit: {
+          glow: "hsl(var(--biofit-glow))",
+          "glow-dim": "hsl(var(--biofit-glow-dim))",
+          surface: "hsl(var(--biofit-surface))",
+          "surface-hover": "hsl(var(--biofit-surface-hover))",
+          amber: "hsl(var(--biofit-amber))",
+          blue: "hsl(var(--biofit-blue))",
+          purple: "hsl(var(--biofit-purple))",
+          red: "hsl(var(--biofit-red))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +79,27 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 20px 0px hsl(145 80% 50% / 0.3)" },
+          "50%": { boxShadow: "0 0 30px 5px hsl(145 80% 50% / 0.5)" },
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "float": "float 3s ease-in-out infinite",
       },
     },
   },
