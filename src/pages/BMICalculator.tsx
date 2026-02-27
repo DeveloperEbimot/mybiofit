@@ -5,16 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function BMICalculator() {
   const { profile, updateProfile } = useUserProfile();
+  const { user } = useAuth();
   const [weight, setWeight] = useState(profile.weight.toString());
   const [height, setHeight] = useState(profile.height.toString());
   const [age, setAge] = useState(profile.age.toString());
   const [gender, setGender] = useState(profile.gender);
   const [result, setResult] = useState<{ bmi: number; category: string; color: string } | null>(null);
 
-  const calculate = () => {
+  const calculate = async () => {
     const w = parseFloat(weight);
     const h = parseFloat(height) / 100;
     if (!w || !h) return;
@@ -27,8 +31,16 @@ export default function BMICalculator() {
     else if (bmi < 30) { category = "Overweight"; color = "text-biofit-amber"; }
     else { category = "Obese"; color = "text-destructive"; }
 
-    setResult({ bmi: Math.round(bmi * 10) / 10, category, color });
+    const bmiRounded = Math.round(bmi * 10) / 10;
+    setResult({ bmi: bmiRounded, category, color });
     updateProfile({ weight: w, height: parseFloat(height), age: parseInt(age), gender });
+
+    if (user) {
+      await supabase.from("bmi_records").insert({
+        user_id: user.id, weight: w, height: parseFloat(height), bmi: bmiRounded, category,
+      });
+      toast.success("BMI record saved!");
+    }
   };
 
   const Icon = result ? (result.bmi < 18.5 ? TrendingDown : result.bmi >= 25 ? TrendingUp : Minus) : Calculator;
@@ -57,9 +69,7 @@ export default function BMICalculator() {
           <div>
             <label className="text-sm text-muted-foreground mb-1 block">Gender</label>
             <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger className="bg-secondary border-border">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger className="bg-secondary border-border"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
@@ -85,6 +95,7 @@ export default function BMICalculator() {
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
             <span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span>
           </div>
+          {!user && <p className="text-xs text-muted-foreground mt-4">Sign in to save your BMI history!</p>}
         </motion.div>
       )}
     </div>

@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Dumbbell, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 
 const planTypes = [
   { value: "weight-loss", label: "Weight Loss" },
@@ -18,12 +21,28 @@ const planTypes = [
 
 export default function FitnessPlan() {
   const { profile } = useUserProfile();
+  const { user } = useAuth();
   const [planType, setPlanType] = useState(profile.dietGoal === "muscle-gain" ? "muscle-gain" : "weight-loss");
-  const [plan, setPlan] = useState<string>(() => {
-    const saved = localStorage.getItem("biofit-fitness-plan");
-    return saved || "";
-  });
+  const [plan, setPlan] = useState("");
+  const [planId, setPlanId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Load saved plan
+  useEffect(() => {
+    if (user) {
+      supabase.from("fitness_plans").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1)
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            setPlan(data[0].content);
+            setPlanType(data[0].plan_type);
+            setPlanId(data[0].id);
+          }
+        });
+    } else {
+      const saved = localStorage.getItem("biofit-fitness-plan");
+      if (saved) setPlan(saved);
+    }
+  }, [user]);
 
   const generatePlan = async () => {
     setLoading(true);
@@ -78,7 +97,17 @@ Include warm-up and cool-down routines. Make it progressive (increasing difficul
           } catch { buffer = line + "\n" + buffer; break; }
         }
       }
-      localStorage.setItem("biofit-fitness-plan", result);
+
+      // Save
+      if (user) {
+        // Delete old plan if exists
+        if (planId) await supabase.from("fitness_plans").delete().eq("id", planId);
+        const { data } = await supabase.from("fitness_plans").insert({ user_id: user.id, plan_type: planType, content: result }).select().single();
+        if (data) setPlanId(data.id);
+        toast.success("Fitness plan saved!");
+      } else {
+        localStorage.setItem("biofit-fitness-plan", result);
+      }
     } catch (e) {
       setPlan("Error generating plan. Please try again.");
     } finally {
@@ -86,9 +115,14 @@ Include warm-up and cool-down routines. Make it progressive (increasing difficul
     }
   };
 
-  const deletePlan = () => {
+  const deletePlan = async () => {
     setPlan("");
+    setPlanId(null);
     localStorage.removeItem("biofit-fitness-plan");
+    if (user && planId) {
+      await supabase.from("fitness_plans").delete().eq("id", planId);
+      toast.success("Plan deleted");
+    }
   };
 
   return (
@@ -101,16 +135,13 @@ Include warm-up and cool-down routines. Make it progressive (increasing difficul
       <div className="glass-card p-5 space-y-4">
         <label className="text-sm font-medium text-muted-foreground">Choose Your Plan Type</label>
         <Select value={planType} onValueChange={setPlanType}>
-          <SelectTrigger className="bg-secondary border-border">
-            <SelectValue />
-          </SelectTrigger>
+          <SelectTrigger className="bg-secondary border-border"><SelectValue /></SelectTrigger>
           <SelectContent>
             {planTypes.map(p => (
               <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-
         <div className="flex gap-2">
           <Button onClick={generatePlan} disabled={loading} className="flex-1">
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Dumbbell className="w-4 h-4 mr-2" />}
@@ -118,12 +149,8 @@ Include warm-up and cool-down routines. Make it progressive (increasing difficul
           </Button>
           {plan && (
             <>
-              <Button variant="outline" onClick={generatePlan} disabled={loading}>
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" onClick={deletePlan} className="text-destructive hover:text-destructive">
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <Button variant="outline" onClick={generatePlan} disabled={loading}><RefreshCw className="w-4 h-4" /></Button>
+              <Button variant="outline" onClick={deletePlan} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
             </>
           )}
         </div>
@@ -141,6 +168,7 @@ Include warm-up and cool-down routines. Make it progressive (increasing difficul
         <div className="glass-card p-12 text-center">
           <Dumbbell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">Choose a plan type and generate your personalized fitness plan!</p>
+          {!user && <p className="text-xs text-muted-foreground mt-2">Sign in to save your plans!</p>}
         </div>
       )}
     </div>
