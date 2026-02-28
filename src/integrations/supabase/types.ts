@@ -95,6 +95,45 @@ export type Database = {
         }
         Relationships: []
       }
+      nutrition_logs: {
+        Row: {
+          calories: number
+          carbs: number
+          created_at: string
+          fat: number
+          fiber: number
+          id: string
+          logged_at: string
+          meal_name: string
+          protein: number
+          user_id: string
+        }
+        Insert: {
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          fiber?: number
+          id?: string
+          logged_at?: string
+          meal_name: string
+          protein?: number
+          user_id: string
+        }
+        Update: {
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          fiber?: number
+          id?: string
+          logged_at?: string
+          meal_name?: string
+          protein?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activity_level: string | null
