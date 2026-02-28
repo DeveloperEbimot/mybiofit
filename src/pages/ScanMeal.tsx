@@ -1,15 +1,51 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import { Camera, Upload, Loader2, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
+
+interface ParsedNutrition {
+  meal_name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+}
+
+function extractNutrition(text: string): ParsedNutrition | null {
+  try {
+    // Look for a JSON block in the response
+    const jsonMatch = text.match(/```json\s*([\s\S]*?)```/) || text.match(/\{[\s\S]*?"meal_name"[\s\S]*?\}/);
+    if (jsonMatch) {
+      const raw = jsonMatch[1] || jsonMatch[0];
+      const parsed = JSON.parse(raw);
+      if (parsed.meal_name) return {
+        meal_name: parsed.meal_name,
+        calories: Number(parsed.calories) || 0,
+        protein: Number(parsed.protein) || 0,
+        carbs: Number(parsed.carbs) || 0,
+        fat: Number(parsed.fat) || 0,
+        fiber: Number(parsed.fiber) || 0,
+      };
+    }
+  } catch {}
+  return null;
+}
 
 export default function ScanMeal() {
   const { profile } = useUserProfile();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [image, setImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [nutrition, setNutrition] = useState<ParsedNutrition | null>(null);
+  const [logged, setLogged] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,10 +56,41 @@ export default function ScanMeal() {
     reader.readAsDataURL(file);
   };
 
+  const logToStats = async (data: ParsedNutrition) => {
+    if (user) {
+      const { error } = await supabase.from("nutrition_logs").insert({
+        user_id: user.id,
+        meal_name: data.meal_name,
+        calories: data.calories,
+        protein: data.protein,
+        carbs: data.carbs,
+        fat: data.fat,
+        fiber: data.fiber,
+      });
+      if (error) {
+        toast({ title: "Failed to log to stats", variant: "destructive" });
+        return;
+      }
+    } else {
+      const saved = localStorage.getItem("biofit-nutrition-logs");
+      const logs = saved ? JSON.parse(saved) : [];
+      logs.unshift({
+        id: crypto.randomUUID(),
+        ...data,
+        logged_at: new Date().toISOString().split("T")[0],
+      });
+      localStorage.setItem("biofit-nutrition-logs", JSON.stringify(logs));
+    }
+    setLogged(true);
+    toast({ title: "Meal logged to Statistics!", description: `${data.calories} kcal • ${data.protein}g protein • ${data.carbs}g carbs • ${data.fat}g fat` });
+  };
+
   const analyzeMeal = async () => {
     if (!image) return;
     setLoading(true);
     setAnalysis("");
+    setNutrition(null);
+    setLogged(false);
 
     try {
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat`, {
@@ -33,9 +100,16 @@ export default function ScanMeal() {
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
-          messages: [{ role: "user", content: `Analyze this meal image. My diet goal is: ${profile.dietGoal}. Tell me: 1) What foods you see 2) Estimated calories and macros 3) Whether it fits my ${profile.dietGoal} diet 4) Suggestions to improve it. Be specific and helpful.` }],
+          messages: [{ role: "user", content: `Analyze this meal image. My diet goal is: ${profile.dietGoal}. 
+
+IMPORTANT: At the very end of your response, include a JSON block with the estimated nutrition data in this exact format:
+\`\`\`json
+{"meal_name": "Name of the meal", "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "fiber": 0}
+\`\`\`
+
+Tell me: 1) What foods you see 2) Estimated calories and macros (protein, carbs, fat, fiber in grams) 3) Whether it fits my ${profile.dietGoal} diet 4) Suggestions to improve it. Be specific and helpful.` }],
           image,
-          systemPrompt: "You are BioFit AI, a nutrition expert. Analyze food images and provide detailed nutritional analysis. Always estimate calories and macronutrients. Be encouraging but honest.",
+          systemPrompt: "You are BioFit AI, a nutrition expert. Analyze food images and provide detailed nutritional analysis. Always estimate calories and macronutrients. Be encouraging but honest. ALWAYS include a JSON block at the end with meal_name, calories, protein, carbs, fat, fiber values.",
         }),
       });
 
@@ -65,6 +139,10 @@ export default function ScanMeal() {
           } catch { buffer = line + "\n" + buffer; break; }
         }
       }
+
+      // Extract nutrition from completed response
+      const parsed = extractNutrition(result);
+      if (parsed) setNutrition(parsed);
     } catch (e) {
       console.error(e);
       setAnalysis("Error analyzing meal. Please try again.");
@@ -105,7 +183,7 @@ export default function ScanMeal() {
               {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               {loading ? "Analyzing..." : "Analyze Meal"}
             </Button>
-            <Button variant="outline" onClick={() => { setImage(null); setAnalysis(""); }}>
+            <Button variant="outline" onClick={() => { setImage(null); setAnalysis(""); setNutrition(null); setLogged(false); }}>
               New Photo
             </Button>
           </div>
@@ -116,8 +194,30 @@ export default function ScanMeal() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6">
           <h2 className="font-display font-semibold text-lg mb-3 text-primary">Analysis Result</h2>
           <div className="prose prose-sm prose-invert max-w-none">
-            <ReactMarkdown>{analysis}</ReactMarkdown>
+            <ReactMarkdown>{analysis.replace(/```json[\s\S]*?```/g, "").trim()}</ReactMarkdown>
           </div>
+
+          {nutrition && !logged && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">{nutrition.meal_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {nutrition.calories} kcal • P: {nutrition.protein}g • C: {nutrition.carbs}g • F: {nutrition.fat}g • Fiber: {nutrition.fiber}g
+                  </p>
+                </div>
+                <Button onClick={() => logToStats(nutrition)} size="sm" className="gap-2">
+                  <BarChart3 className="w-4 h-4" /> Log to Stats
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {logged && (
+            <div className="mt-4 p-3 rounded-lg bg-primary/10 text-primary text-sm font-medium text-center">
+              ✓ Logged to Statistics
+            </div>
+          )}
         </motion.div>
       )}
     </div>
