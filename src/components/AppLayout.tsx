@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, LogIn, LogOut } from "lucide-react";
+import { Home, Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, BarChart3, LogIn, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ const navItems = [
   { to: "/fitness", icon: Dumbbell, label: "Fitness" },
   { to: "/bmi", icon: Calculator, label: "BMI" },
   { to: "/chat", icon: MessageCircle, label: "Chat" },
+  { to: "/stats", icon: BarChart3, label: "Stats" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

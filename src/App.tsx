@@ -12,6 +12,7 @@ import GroceryList from "./pages/GroceryList";
 import FitnessPlan from "./pages/FitnessPlan";
 import BMICalculator from "./pages/BMICalculator";
 import AIChat from "./pages/AIChat";
+import Statistics from "./pages/Statistics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/fitness" element={<FitnessPlan />} />
               <Route path="/bmi" element={<BMICalculator />} />
               <Route path="/chat" element={<AIChat />} />
+              <Route path="/stats" element={<Statistics />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
