@@ -4,6 +4,7 @@ import { Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calcula
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DailyTasks from "@/components/DailyTasks";
 
 const features = [
   { icon: Camera, label: "Scan Meal", desc: "AI analyzes your food", to: "/scan", color: "text-biofit-glow" },
@@ -66,6 +67,9 @@ export default function Index() {
           </Select>
         </div>
       </motion.section>
+
+      {/* Daily Tasks */}
+      <DailyTasks />
 
       {/* Feature Grid */}
       <section className="grid grid-cols-2 md:grid-cols-3 gap-4">
