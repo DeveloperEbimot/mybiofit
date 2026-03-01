@@ -2,8 +2,8 @@ import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, ArrowRight, Zap } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+const DietGoalSelector = lazy(() => import("@/components/DietGoalSelector"));
 const DailyTasks = lazy(() => import("@/components/DailyTasks"));
 
 const features = [
@@ -13,17 +13,6 @@ const features = [
   { icon: Dumbbell, label: "Fitness Plan", desc: "Monthly workouts", to: "/fitness", color: "text-biofit-purple" },
   { icon: Calculator, label: "BMI Calculator", desc: "Track your body", to: "/bmi", color: "text-biofit-red" },
   { icon: MessageCircle, label: "AI Chat", desc: "Voice & text chat", to: "/chat", color: "text-primary" },
-];
-
-const dietGoals = [
-  { value: "weight-loss", label: "Weight Loss" },
-  { value: "muscle-gain", label: "Muscle Gain" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "keto", label: "Keto" },
-  { value: "vegan", label: "Vegan" },
-  { value: "high-protein", label: "High Protein" },
-  { value: "low-carb", label: "Low Carb" },
-  { value: "mediterranean", label: "Mediterranean" },
 ];
 
 export default function Index() {
@@ -43,20 +32,10 @@ export default function Index() {
           Your AI-powered nutrition & fitness companion. Scan meals, get recipes, build plans — all personalized to you.
         </p>
 
-        {/* Diet Goal Selector */}
-        <div className="glass-card p-6 max-w-sm mx-auto space-y-3">
-          <label className="text-sm font-medium text-muted-foreground">Your Diet Goal</label>
-          <Select value={profile.dietGoal} onValueChange={(v) => updateProfile({ dietGoal: v })}>
-            <SelectTrigger className="bg-secondary border-border">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {dietGoals.map(g => (
-                <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Diet Goal Selector - lazy loaded to reduce initial JS */}
+        <Suspense fallback={<div className="glass-card p-6 max-w-sm mx-auto h-24 animate-pulse" />}>
+          <DietGoalSelector value={profile.dietGoal} onChange={(v) => updateProfile({ dietGoal: v })} />
+        </Suspense>
       </section>
 
       {/* Daily Tasks */}
