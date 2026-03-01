@@ -1,10 +1,11 @@
+import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, ArrowRight, Zap } from "lucide-react";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import DailyTasks from "@/components/DailyTasks";
+const DailyTasks = lazy(() => import("@/components/DailyTasks"));
 
 const features = [
   { icon: Camera, label: "Scan Meal", desc: "AI analyzes your food", to: "/scan", color: "text-biofit-glow" },
@@ -69,7 +70,9 @@ export default function Index() {
       </motion.section>
 
       {/* Daily Tasks */}
-      <DailyTasks />
+      <Suspense fallback={<div className="glass-card p-6 animate-pulse h-40" />}>
+        <DailyTasks />
+      </Suspense>
 
       {/* Feature Grid */}
       <section className="grid grid-cols-2 md:grid-cols-3 gap-4">
