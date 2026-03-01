@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Plus, Trash2, Dumbbell, UtensilsCrossed, ListTodo, Loader2 } from "lucide-react";
-import { useDailyTasks, DailyTask } from "@/hooks/useDailyTasks";
+import { useDailyTasks } from "@/hooks/useDailyTasks";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,61 @@ const taskColors: Record<string, string> = {
   meal: "text-biofit-amber",
   custom: "text-primary",
 };
+
+const TaskItem = forwardRef<HTMLLIElement, {
+  task: { id: string; title: string; task_type: string; completed: boolean };
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+}>(({ task, onToggle, onDelete }, ref) => {
+  const Icon = taskIcons[task.task_type] || ListTodo;
+  const color = taskColors[task.task_type] || "text-primary";
+
+  return (
+    <li
+      ref={ref}
+      className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+        task.completed
+          ? "bg-primary/5 opacity-60"
+          : "bg-secondary/50 hover:bg-secondary"
+      }`}
+    >
+      <button
+        onClick={() => onToggle(task.id)}
+        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+          task.completed
+            ? "bg-primary border-primary"
+            : "border-muted-foreground/40 hover:border-primary"
+        }`}
+      >
+        {task.completed && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+      </button>
+
+      <Icon className={`w-4 h-4 shrink-0 ${color}`} />
+
+      <span
+        className={`text-sm flex-1 ${
+          task.completed
+            ? "line-through text-muted-foreground"
+            : "text-foreground"
+        }`}
+      >
+        {task.title}
+      </span>
+
+      {task.task_type === "custom" && (
+        <button
+          onClick={() => onDelete(task.id)}
+          className="text-muted-foreground hover:text-destructive transition-colors"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </li>
+  );
+});
+TaskItem.displayName = "TaskItem";
+
+const MotionTaskItem = motion.create(TaskItem);
 
 export default function DailyTasks() {
   const { user } = useAuth();
@@ -58,57 +113,18 @@ export default function DailyTasks() {
       ) : (
         <ul className="space-y-2">
           <AnimatePresence>
-            {tasks.map((task) => {
-              const Icon = taskIcons[task.task_type] || ListTodo;
-              const color = taskColors[task.task_type] || "text-primary";
-
-              return (
-                <motion.li
-                  key={task.id}
-                  layout
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                    task.completed
-                      ? "bg-primary/5 opacity-60"
-                      : "bg-secondary/50 hover:bg-secondary"
-                  }`}
-                >
-                  <button
-                    onClick={() => toggleTask(task.id)}
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                      task.completed
-                        ? "bg-primary border-primary"
-                        : "border-muted-foreground/40 hover:border-primary"
-                    }`}
-                  >
-                    {task.completed && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
-                  </button>
-
-                  <Icon className={`w-4 h-4 shrink-0 ${color}`} />
-
-                  <span
-                    className={`text-sm flex-1 ${
-                      task.completed
-                        ? "line-through text-muted-foreground"
-                        : "text-foreground"
-                    }`}
-                  >
-                    {task.title}
-                  </span>
-
-                  {task.task_type === "custom" && (
-                    <button
-                      onClick={() => deleteTask(task.id)}
-                      className="text-muted-foreground hover:text-destructive transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </motion.li>
-              );
-            })}
+            {tasks.map((task) => (
+              <MotionTaskItem
+                key={task.id}
+                task={task}
+                onToggle={toggleTask}
+                onDelete={deleteTask}
+                layout
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+              />
+            ))}
           </AnimatePresence>
         </ul>
       )}
