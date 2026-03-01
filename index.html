@@ -11,9 +11,10 @@
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" /></noscript>
     <title>BioFit - AI Nutrition &amp; Fitness</title>
     <style>
-      body{margin:0;background:#111318;color:#f2f2f2;font-family:system-ui,-apple-system,sans-serif}
-      #root:empty{display:flex;align-items:center;justify-content:center;min-height:100vh}
-      #root:empty::after{content:'';width:32px;height:32px;border:3px solid #333;border-top-color:#22c55e;border-radius:50%;animation:s .6s linear infinite}
+      body{margin:0;background:#111318;color:#f2f2f2;font-family:'Inter',system-ui,-apple-system,sans-serif}
+      #root:empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+      #root:empty::before{content:'Welcome to BioFit';font-family:'Space Grotesk',system-ui,sans-serif;font-size:2rem;font-weight:700;margin-bottom:0.5rem}
+      #root:empty::after{content:'Your AI-powered nutrition & fitness companion';font-size:1rem;color:#8b8b8b}
       @keyframes s{to{transform:rotate(360deg)}}
     </style>
     <meta name="description" content="BioFit: AI-powered meal scanning, recipes, grocery lists, fitness plans, and BMI calculator. Your personal health companion.">
