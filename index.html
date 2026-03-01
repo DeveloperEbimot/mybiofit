@@ -8,10 +8,14 @@
     <link rel="preconnect" href="https://cdn.gpteng.co" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4C_k3HqU.woff2" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" /></noscript>
-    <!-- TODO: Set the document title to the name of your application -->
     <title>BioFit - AI Nutrition &amp; Fitness</title>
+    <style>
+      body{margin:0;background:#111318;color:#f2f2f2;font-family:system-ui,-apple-system,sans-serif}
+      #root:empty{display:flex;align-items:center;justify-content:center;min-height:100vh}
+      #root:empty::after{content:'';width:32px;height:32px;border:3px solid #333;border-top-color:#22c55e;border-radius:50%;animation:s .6s linear infinite}
+      @keyframes s{to{transform:rotate(360deg)}}
+    </style>
     <meta name="description" content="BioFit: AI-powered meal scanning, recipes, grocery lists, fitness plans, and BMI calculator. Your personal health companion.">
     <meta name="author" content="Lovable" />
 
@@ -35,5 +39,7 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <script>
+      var l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap';document.head.appendChild(l);
+    </script>
 </html>
