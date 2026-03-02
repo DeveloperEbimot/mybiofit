@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
+import RouteChangeTracker from "@/components/RouteChangeTracker";
 
 const Index = lazy(() => import("./pages/Index"));
 const ScanMeal = lazy(() => import("./pages/ScanMeal"));
@@ -26,6 +27,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <RouteChangeTracker />
           <AppLayout>
             <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
               <Routes>
