@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
+import RatingPopup from "@/components/RatingPopup";
 import {
   Camera,
   UtensilsCrossed,
@@ -40,7 +41,7 @@ export default function Index() {
 
   return (
     <div className="space-y-10">
-      {/* ─── Hero Section ─── */}
+      <RatingPopup />
       <section className="relative text-center py-14 md:py-20 animate-fade-up overflow-hidden">
         {/* Decorative glow */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden>

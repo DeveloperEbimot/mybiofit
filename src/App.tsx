@@ -16,6 +16,7 @@ const FitnessPlan = lazy(() => import("./pages/FitnessPlan"));
 const BMICalculator = lazy(() => import("./pages/BMICalculator"));
 const AIChat = lazy(() => import("./pages/AIChat"));
 const Statistics = lazy(() => import("./pages/Statistics"));
+const Ratings = lazy(() => import("./pages/Ratings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
                 <Route path="/bmi" element={<BMICalculator />} />
                 <Route path="/chat" element={<AIChat />} />
                 <Route path="/stats" element={<Statistics />} />
+                <Route path="/ratings" element={<Ratings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
