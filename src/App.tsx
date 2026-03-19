@@ -44,6 +44,7 @@ const App = () => (
                 <Route path="/chat" element={<AIChat />} />
                 <Route path="/stats" element={<Statistics />} />
                 <Route path="/ratings" element={<Ratings />} />
+                <Route path="/pwa-installs" element={<PWAInstalls />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

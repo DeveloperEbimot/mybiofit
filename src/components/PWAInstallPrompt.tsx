@@ -49,6 +49,11 @@ export default function PWAInstallPrompt() {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === "accepted") {
       setShowPrompt(false);
+      // Log the install
+      supabase.from("pwa_installs").insert({
+        user_agent: navigator.userAgent,
+        platform: navigator.platform || "unknown",
+      }).then();
     }
     setDeferredPrompt(null);
   };
