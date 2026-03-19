@@ -55,6 +55,9 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    modulePreload: {
+      resolveDependencies: () => [],
+    },
     rollupOptions: {
       output: {
         manualChunks: {
