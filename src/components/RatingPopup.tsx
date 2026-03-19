@@ -26,7 +26,7 @@ export default function RatingPopup() {
       if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) return;
     }
 
-    const timer = setTimeout(() => setOpen(true), 15000);
+    const timer = setTimeout(() => setOpen(true), 25000);
     return () => clearTimeout(timer);
   }, []);
 
