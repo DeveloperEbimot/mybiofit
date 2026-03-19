@@ -18,6 +18,7 @@ const BMICalculator = lazy(() => import("./pages/BMICalculator"));
 const AIChat = lazy(() => import("./pages/AIChat"));
 const Statistics = lazy(() => import("./pages/Statistics"));
 const Ratings = lazy(() => import("./pages/Ratings"));
+const PWAInstalls = lazy(() => import("./pages/PWAInstalls"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
