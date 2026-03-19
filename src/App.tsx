@@ -18,6 +18,7 @@ const BMICalculator = lazy(() => import("./pages/BMICalculator"));
 const AIChat = lazy(() => import("./pages/AIChat"));
 const Statistics = lazy(() => import("./pages/Statistics"));
 const Ratings = lazy(() => import("./pages/Ratings"));
+const PWAInstalls = lazy(() => import("./pages/PWAInstalls"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/chat" element={<AIChat />} />
                 <Route path="/stats" element={<Statistics />} />
                 <Route path="/ratings" element={<Ratings />} />
+                <Route path="/pwa-installs" element={<PWAInstalls />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

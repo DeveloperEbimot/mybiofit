@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -47,6 +48,11 @@ export default function PWAInstallPrompt() {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === "accepted") {
       setShowPrompt(false);
+      // Log the install
+      supabase.from("pwa_installs").insert({
+        user_agent: navigator.userAgent,
+        platform: navigator.platform || "unknown",
+      }).then();
     }
     setDeferredPrompt(null);
   };

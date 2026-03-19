@@ -206,6 +206,27 @@ export type Database = {
         }
         Relationships: []
       }
+      pwa_installs: {
+        Row: {
+          id: string
+          installed_at: string
+          platform: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          installed_at?: string
+          platform?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          id?: string
+          installed_at?: string
+          platform?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       ratings: {
         Row: {
           created_at: string | null
