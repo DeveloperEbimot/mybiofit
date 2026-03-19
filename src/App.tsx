@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
 import RouteChangeTracker from "@/components/RouteChangeTracker";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 const Index = lazy(() => import("./pages/Index"));
 const ScanMeal = lazy(() => import("./pages/ScanMeal"));
@@ -27,6 +28,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <PWAInstallPrompt />
         <BrowserRouter>
           <RouteChangeTracker />
           <AppLayout>

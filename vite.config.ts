@@ -21,6 +21,16 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.ico", "pwa-192x192.png", "pwa-512x512.png"],
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/pagead2\.googlesyndication\.com\/.*/i,
+            handler: "NetworkOnly",
+          },
+          {
+            urlPattern: /^https:\/\/googleads\.g\.doubleclick\.net\/.*/i,
+            handler: "NetworkOnly",
+          },
+        ],
       },
       manifest: {
         name: "BioFit - AI Nutrition & Fitness",
