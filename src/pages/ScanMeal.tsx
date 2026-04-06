@@ -1,12 +1,20 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Camera, Upload, Loader2, BarChart3 } from "lucide-react";
+import { Camera, ImagePlus, Loader2, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface ParsedNutrition {
   meal_name: string;
@@ -19,7 +27,6 @@ interface ParsedNutrition {
 
 function extractNutrition(text: string): ParsedNutrition | null {
   try {
-    // Look for a JSON block in the response
     const jsonMatch = text.match(/```json\s*([\s\S]*?)```/) || text.match(/\{[\s\S]*?"meal_name"[\s\S]*?\}/);
     if (jsonMatch) {
       const raw = jsonMatch[1] || jsonMatch[0];
@@ -46,7 +53,8 @@ export default function ScanMeal() {
   const [loading, setLoading] = useState(false);
   const [nutrition, setNutrition] = useState<ParsedNutrition | null>(null);
   const [logged, setLogged] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -140,7 +148,6 @@ Tell me: 1) What foods you see 2) Estimated calories and macros (protein, carbs,
         }
       }
 
-      // Extract nutrition from completed response
       const parsed = extractNutrition(result);
       if (parsed) setNutrition(parsed);
     } catch (e) {
@@ -158,20 +165,28 @@ Tell me: 1) What foods you see 2) Estimated calories and macros (protein, carbs,
         <p className="text-muted-foreground">Upload a photo and AI will analyze if it fits your <span className="text-primary font-medium">{profile.dietGoal}</span> diet.</p>
       </motion.div>
 
-      <input type="file" ref={fileRef} accept="image/*" capture="environment" className="hidden" onChange={handleFile} />
+      {/* Two hidden file inputs: one for camera, one for gallery */}
+      <input type="file" ref={cameraRef} accept="image/*" capture="environment" className="hidden" onChange={handleFile} />
+      <input type="file" ref={galleryRef} accept="image/*" className="hidden" onChange={handleFile} />
 
       {!image ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="glass-card border-2 border-dashed border-border hover:border-primary/50 transition-colors p-12 text-center cursor-pointer"
-          onClick={() => fileRef.current?.click()}
-        >
-          <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground mb-2">Take a photo or upload an image</p>
-          <Button variant="outline" size="sm">
-            <Upload className="w-4 h-4 mr-2" /> Choose Image
-          </Button>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+          <div
+            className="glass-card border-2 border-dashed border-border hover:border-primary/50 transition-colors p-8 text-center cursor-pointer"
+            onClick={() => cameraRef.current?.click()}
+          >
+            <Camera className="w-10 h-10 text-primary mx-auto mb-3" />
+            <p className="font-medium text-foreground">Take a Photo</p>
+            <p className="text-sm text-muted-foreground">Use your camera to snap a picture</p>
+          </div>
+          <div
+            className="glass-card border-2 border-dashed border-border hover:border-primary/50 transition-colors p-8 text-center cursor-pointer"
+            onClick={() => galleryRef.current?.click()}
+          >
+            <ImagePlus className="w-10 h-10 text-primary mx-auto mb-3" />
+            <p className="font-medium text-foreground">Upload from Gallery</p>
+            <p className="text-sm text-muted-foreground">Choose an existing photo from your device</p>
+          </div>
         </motion.div>
       ) : (
         <div className="space-y-4">
@@ -191,32 +206,58 @@ Tell me: 1) What foods you see 2) Estimated calories and macros (protein, carbs,
       )}
 
       {analysis && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6">
-          <h2 className="font-display font-semibold text-lg mb-3 text-primary">Analysis Result</h2>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 space-y-4">
+          <h2 className="font-display font-semibold text-lg text-primary">Analysis Result</h2>
           <div className="prose prose-sm prose-invert max-w-none">
             <ReactMarkdown>{analysis.replace(/```json[\s\S]*?```/g, "").trim()}</ReactMarkdown>
           </div>
 
-          {nutrition && !logged && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">{nutrition.meal_name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {nutrition.calories} kcal • P: {nutrition.protein}g • C: {nutrition.carbs}g • F: {nutrition.fat}g • Fiber: {nutrition.fiber}g
-                  </p>
-                </div>
-                <Button onClick={() => logToStats(nutrition)} size="sm" className="gap-2">
-                  <BarChart3 className="w-4 h-4" /> Log to Stats
-                </Button>
+          {nutrition && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+              <h3 className="font-display font-semibold text-base text-foreground">{nutrition.meal_name}</h3>
+              <div className="rounded-lg border border-border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">Nutrient</TableHead>
+                      <TableHead className="text-right font-semibold">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">🔥 Calories</TableCell>
+                      <TableCell className="text-right">{nutrition.calories} kcal</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">💪 Protein</TableCell>
+                      <TableCell className="text-right">{nutrition.protein}g</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">🍞 Carbs</TableCell>
+                      <TableCell className="text-right">{nutrition.carbs}g</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">🧈 Fat</TableCell>
+                      <TableCell className="text-right">{nutrition.fat}g</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">🥬 Fiber</TableCell>
+                      <TableCell className="text-right">{nutrition.fiber}g</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </div>
-            </motion.div>
-          )}
 
-          {logged && (
-            <div className="mt-4 p-3 rounded-lg bg-primary/10 text-primary text-sm font-medium text-center">
-              ✓ Logged to Statistics
-            </div>
+              {!logged ? (
+                <Button onClick={() => logToStats(nutrition)} className="w-full gap-2">
+                  <BarChart3 className="w-4 h-4" /> Log to Statistics
+                </Button>
+              ) : (
+                <div className="p-3 rounded-lg bg-primary/10 text-primary text-sm font-medium text-center">
+                  ✓ Logged to Statistics
+                </div>
+              )}
+            </motion.div>
           )}
         </motion.div>
       )}
