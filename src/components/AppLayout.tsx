@@ -1,10 +1,11 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, BarChart3, LogIn, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
@@ -19,14 +20,33 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
 
-  const handleGoogleSignIn = async () => {
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (error) console.error("Sign in error:", error);
-  };
+  // Redirect new users to onboarding after first sign-in
+  useEffect(() => {
+    if (!user || loading) return;
+    const authPages = ["/signin", "/signup", "/onboarding"];
+    if (authPages.includes(location.pathname)) return;
+
+    supabase
+      .from("profiles")
+      .select("age, weight, height")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        // If profile has default values, redirect to onboarding
+        if (data && data.age === 25 && Number(data.weight) === 70 && Number(data.height) === 170) {
+          // Check if this is a brand-new user (created in last 5 min)
+          const created = new Date(user.created_at).getTime();
+          if (Date.now() - created < 5 * 60 * 1000) {
+            navigate("/onboarding");
+          }
+        }
+      });
+  }, [user, loading, location.pathname, navigate]);
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "U";
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,9 +83,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={user.user_metadata?.avatar_url} />
                         <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                          {user.email?.charAt(0).toUpperCase() || "U"}
+                          {displayName.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -80,8 +99,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button variant="outline" size="sm" onClick={handleGoogleSignIn} className="gap-2">
-                  <LogIn className="w-4 h-4" /> Sign In
+                <Button asChild variant="outline" size="sm" className="gap-2">
+                  <Link to="/signin">
+                    <LogIn className="w-4 h-4" /> Sign In
+                  </Link>
                 </Button>
               )
             )}
