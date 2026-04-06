@@ -19,6 +19,9 @@ const AIChat = lazy(() => import("./pages/AIChat"));
 const Statistics = lazy(() => import("./pages/Statistics"));
 const Ratings = lazy(() => import("./pages/Ratings"));
 const PWAInstalls = lazy(() => import("./pages/PWAInstalls"));
+const SignIn = lazy(() => import("./pages/SignIn"));
+const SignUp = lazy(() => import("./pages/SignUp"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -45,6 +48,9 @@ const App = () => (
                 <Route path="/stats" element={<Statistics />} />
                 <Route path="/ratings" element={<Ratings />} />
                 <Route path="/pwa-installs" element={<PWAInstalls />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
