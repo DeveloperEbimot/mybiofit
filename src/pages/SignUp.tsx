@@ -36,29 +36,10 @@ export default function SignUp() {
     if (error) {
       toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
     } else {
-      setSent(true);
+      navigate("/onboarding");
     }
     setLoading(false);
   };
-
-  if (sent) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center px-4">
-        <div className="glass-card p-8 w-full max-w-sm text-center space-y-4">
-          <div className="w-12 h-12 mx-auto rounded-xl bg-primary/20 flex items-center justify-center">
-            <UserPlus className="w-6 h-6 text-primary" />
-          </div>
-          <h2 className="font-display text-xl font-bold text-foreground">Check Your Email</h2>
-          <p className="text-sm text-muted-foreground">
-            We've sent a verification link to <span className="font-medium text-foreground">{email}</span>. Click the link to activate your account.
-          </p>
-          <Link to="/signin" className="text-primary hover:underline text-sm font-medium">
-            Back to Sign In
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
