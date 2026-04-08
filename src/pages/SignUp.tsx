@@ -34,7 +34,10 @@ export default function SignUp() {
     });
 
     if (error) {
-      toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
+      const msg = error.message.toLowerCase().includes("already registered")
+        ? "An account with this email already exists. Please sign in instead."
+        : error.message;
+      toast({ title: "Sign up failed", description: msg, variant: "destructive" });
     } else {
       navigate("/onboarding");
     }
