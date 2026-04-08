@@ -53,6 +53,8 @@ const App = () => (
                 <Route path="/pwa-installs" element={<PWAInstalls />} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
