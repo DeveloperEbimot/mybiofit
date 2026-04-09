@@ -151,6 +151,17 @@ export default function Index() {
           </Button>
         </div>
       </section>
+
+      {/* ─── Contact Us ─── */}
+      <section className="text-center py-6 animate-fade-up" style={{ animationDelay: "0.4s" }}>
+        <Button asChild variant="outline" size="lg" className="text-base gap-2">
+          <a href="mailto:biofit096@gmail.com">
+            <MessageCircle className="w-5 h-5" />
+            Contact Us
+          </a>
+        </Button>
+        <p className="text-xs text-muted-foreground mt-2">biofit096@gmail.com</p>
+      </section>
     </div>
   );
 }
