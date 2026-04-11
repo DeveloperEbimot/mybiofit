@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/hooks/useAuth";
 
 const DietGoalSelector = lazy(() => import("@/components/DietGoalSelector"));
 const DailyTasks = lazy(() => import("@/components/DailyTasks"));
@@ -29,6 +30,7 @@ const features = [
 
 export default function Index() {
   const { profile, updateProfile } = useUserProfile();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-10">
