@@ -111,29 +111,30 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ─── Bottom CTA ─── */}
-      <section className="glass-card p-8 md:p-12 text-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
-        <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-          Ready to Transform Your Diet?
-        </h2>
-        <p className="text-muted-foreground max-w-md mx-auto mb-6">
-          Start by scanning a meal or chatting with our AI coach. It takes less than 30 seconds.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
-            <Link to="/scan">
-              <Camera className="w-5 h-5" />
-              Get Started Now
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="lg" className="text-base gap-2">
-            <Link to="/recipes">
-              Browse Recipes
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Button>
-        </div>
-      </section>
+      {!user && (
+        <section className="glass-card p-8 md:p-12 text-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
+            Ready to Transform Your Diet?
+          </h2>
+          <p className="text-muted-foreground max-w-md mx-auto mb-6">
+            Start by scanning a meal or chatting with our AI coach. It takes less than 30 seconds.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
+              <Link to="/scan">
+                <Camera className="w-5 h-5" />
+                Get Started Now
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="lg" className="text-base gap-2">
+              <Link to="/recipes">
+                Browse Recipes
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* ─── Contact Us ─── */}
       <section className="text-center py-6 animate-fade-up" style={{ animationDelay: "0.4s" }}>
