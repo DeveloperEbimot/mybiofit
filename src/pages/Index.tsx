@@ -53,22 +53,25 @@ export default function Index() {
             Snap a photo of any meal and get instant AI-powered nutrition analysis, personalized recipes & fitness plans.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
-            <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
-              <Link to="/scan">
-                <Camera className="w-5 h-5" />
-                Scan Your First Meal
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-base px-8 gap-2">
-              <Link to="/chat">
-                <Sparkles className="w-5 h-5" />
-                Talk to AI Coach
-              </Link>
-            </Button>
-          </div>
-
-          <p className="text-xs text-muted-foreground">No credit card required · Free to get started</p>
+          {!user && (
+            <>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+                <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
+                  <Link to="/scan">
+                    <Camera className="w-5 h-5" />
+                    Scan Your First Meal
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="text-base px-8 gap-2">
+                  <Link to="/chat">
+                    <Sparkles className="w-5 h-5" />
+                    Talk to AI Coach
+                  </Link>
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">No credit card required · Free to get started</p>
+            </>
+          )}
         </div>
       </section>
 
