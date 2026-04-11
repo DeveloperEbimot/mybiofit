@@ -11,9 +11,6 @@ import {
   ArrowRight,
   Zap,
   Sparkles,
-  TrendingUp,
-  Users,
-  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -30,12 +27,6 @@ const features = [
   { icon: MessageCircle, label: "AI Chat", desc: "Ask anything about nutrition & fitness", to: "/chat", color: "text-primary" },
 ];
 
-const stats = [
-  { icon: Users, value: "500+", label: "Active users" },
-  { icon: Star, value: "4.9", label: "User rating" },
-  { icon: TrendingUp, value: "10K+", label: "Meals scanned" },
-];
-
 export default function Index() {
   const { profile, updateProfile } = useUserProfile();
 
@@ -43,7 +34,6 @@ export default function Index() {
     <div className="space-y-10">
       <RatingPopup />
       <section className="relative text-center py-14 md:py-20 animate-fade-up overflow-hidden">
-        {/* Decorative glow */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-primary/10 blur-[100px]" />
         </div>
@@ -61,7 +51,6 @@ export default function Index() {
             Snap a photo of any meal and get instant AI-powered nutrition analysis, personalized recipes & fitness plans.
           </p>
 
-          {/* Primary CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
             <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
               <Link to="/scan">
@@ -79,17 +68,6 @@ export default function Index() {
 
           <p className="text-xs text-muted-foreground">No credit card required · Free to get started</p>
         </div>
-      </section>
-
-      {/* ─── Social Proof Strip ─── */}
-      <section className="flex items-center justify-center gap-8 md:gap-14 py-2 animate-fade-up" style={{ animationDelay: "0.15s" }}>
-        {stats.map((s) => (
-          <div key={s.label} className="flex flex-col items-center gap-1">
-            <s.icon className="w-5 h-5 text-primary mb-1" />
-            <span className="font-display text-2xl font-bold text-foreground">{s.value}</span>
-            <span className="text-xs text-muted-foreground">{s.label}</span>
-          </div>
-        ))}
       </section>
 
       {/* ─── Diet Goal Selector ─── */}
