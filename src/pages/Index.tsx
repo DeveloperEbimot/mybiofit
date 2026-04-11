@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useAuth } from "@/hooks/useAuth";
 
 const DietGoalSelector = lazy(() => import("@/components/DietGoalSelector"));
 const DailyTasks = lazy(() => import("@/components/DailyTasks"));
@@ -29,6 +30,7 @@ const features = [
 
 export default function Index() {
   const { profile, updateProfile } = useUserProfile();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-10">
@@ -51,22 +53,25 @@ export default function Index() {
             Snap a photo of any meal and get instant AI-powered nutrition analysis, personalized recipes & fitness plans.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
-            <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
-              <Link to="/scan">
-                <Camera className="w-5 h-5" />
-                Scan Your First Meal
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-base px-8 gap-2">
-              <Link to="/chat">
-                <Sparkles className="w-5 h-5" />
-                Talk to AI Coach
-              </Link>
-            </Button>
-          </div>
-
-          <p className="text-xs text-muted-foreground">No credit card required · Free to get started</p>
+          {!user && (
+            <>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+                <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
+                  <Link to="/scan">
+                    <Camera className="w-5 h-5" />
+                    Scan Your First Meal
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="text-base px-8 gap-2">
+                  <Link to="/chat">
+                    <Sparkles className="w-5 h-5" />
+                    Talk to AI Coach
+                  </Link>
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">No credit card required · Free to get started</p>
+            </>
+          )}
         </div>
       </section>
 
@@ -106,29 +111,30 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ─── Bottom CTA ─── */}
-      <section className="glass-card p-8 md:p-12 text-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
-        <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-          Ready to Transform Your Diet?
-        </h2>
-        <p className="text-muted-foreground max-w-md mx-auto mb-6">
-          Start by scanning a meal or chatting with our AI coach. It takes less than 30 seconds.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
-            <Link to="/scan">
-              <Camera className="w-5 h-5" />
-              Get Started Now
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="lg" className="text-base gap-2">
-            <Link to="/recipes">
-              Browse Recipes
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Button>
-        </div>
-      </section>
+      {!user && (
+        <section className="glass-card p-8 md:p-12 text-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
+            Ready to Transform Your Diet?
+          </h2>
+          <p className="text-muted-foreground max-w-md mx-auto mb-6">
+            Start by scanning a meal or chatting with our AI coach. It takes less than 30 seconds.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button asChild size="lg" className="text-base px-8 gap-2 shadow-lg shadow-primary/25">
+              <Link to="/scan">
+                <Camera className="w-5 h-5" />
+                Get Started Now
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="lg" className="text-base gap-2">
+              <Link to="/recipes">
+                Browse Recipes
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* ─── Contact Us ─── */}
       <section className="text-center py-6 animate-fade-up" style={{ animationDelay: "0.4s" }}>
