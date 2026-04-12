@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import RatingPopup from "@/components/RatingPopup";
+import AdSense from "@/components/AdSense";
 import {
   Camera,
   UtensilsCrossed,
