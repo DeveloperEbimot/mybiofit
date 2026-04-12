@@ -38,7 +38,7 @@ export default function AdSense({
         ref={adRef}
         className="adsbygoogle"
         style={{ display: "block" }}
-        data-ad-client="ca-pub-4858953029915342"
+        data-ad-client="ca-pub-3827888819466055"
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-full-width-responsive={fullWidthResponsive ? "true" : "false"}
