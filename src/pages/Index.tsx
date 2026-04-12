@@ -86,6 +86,9 @@ export default function Index() {
         <DailyTasks />
       </Suspense>
 
+      {/* ─── Ad Unit ─── */}
+      <AdSense className="my-4" />
+
       {/* ─── Feature Grid ─── */}
       <section>
         <h2 className="font-display text-2xl font-bold text-foreground mb-5 text-center">
@@ -111,6 +114,9 @@ export default function Index() {
           ))}
         </div>
       </section>
+
+      {/* ─── Ad Unit ─── */}
+      <AdSense className="my-4" />
 
       {!user && (
         <section className="glass-card p-8 md:p-12 text-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
