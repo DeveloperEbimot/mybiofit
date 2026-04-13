@@ -95,9 +95,14 @@ export default function Index() {
         {/* Dynamic background elements */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-primary/8 blur-[100px]" />
-          <div className="absolute top-10 right-10 w-3 h-3 rounded-full bg-primary/30 animate-float" />
-          <div className="absolute bottom-16 left-16 w-2 h-2 rounded-full bg-accent/40 animate-float" style={{ animationDelay: "1s" }} />
-          <div className="absolute top-20 left-1/4 w-1.5 h-1.5 rounded-full bg-biofit-amber/30 animate-float" style={{ animationDelay: "2s" }} />
+          {/* Animated sport lines */}
+          <div className="absolute top-0 left-[15%] w-px h-full bg-gradient-to-b from-transparent via-primary/20 to-transparent animate-line-move" />
+          <div className="absolute top-0 left-[40%] w-px h-full bg-gradient-to-b from-transparent via-accent/15 to-transparent animate-line-move" style={{ animationDelay: "1.5s" }} />
+          <div className="absolute top-0 left-[65%] w-px h-full bg-gradient-to-b from-transparent via-primary/15 to-transparent animate-line-move" style={{ animationDelay: "3s" }} />
+          <div className="absolute top-0 left-[85%] w-px h-full bg-gradient-to-b from-transparent via-accent/20 to-transparent animate-line-move" style={{ animationDelay: "0.8s" }} />
+          {/* Horizontal sweep */}
+          <div className="absolute top-[30%] left-0 h-px w-full bg-gradient-to-r from-transparent via-primary/15 to-transparent animate-line-sweep" />
+          <div className="absolute top-[70%] left-0 h-px w-full bg-gradient-to-r from-transparent via-accent/10 to-transparent animate-line-sweep" style={{ animationDelay: "2s" }} />
         </div>
 
         <div className="relative z-10">
