@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, BarChart3, LogIn, LogOut, Menu, X } from "lucide-react";
+import { Home, Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, BarChart3, LogIn, LogOut, Menu, X, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -22,14 +23,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut, loading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Close menu on route change
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  // Redirect new users to onboarding after first sign-in
   useEffect(() => {
     if (!user || loading) return;
     const authPages = ["/signin", "/signup", "/onboarding"];
@@ -53,38 +53,37 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "U";
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 glass-card border-b border-border/50">
-        <div className="container flex items-center justify-between h-16">
+    <div className="min-h-screen bg-background transition-colors duration-300">
+      <header className="sticky top-0 z-50 bg-background/70 backdrop-blur-2xl border-b border-border/30">
+        <div className="container flex items-center justify-between h-14">
           <div className="flex items-center gap-2">
-            {/* Mobile menu toggle */}
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="md:hidden rounded-xl"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Toggle menu"
             >
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
 
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <Link to="/" className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20">
                 <span className="font-display font-bold text-primary-foreground text-sm">B</span>
               </div>
-              <span className="font-display font-bold text-xl text-foreground">BioFit</span>
+              <span className="font-display font-bold text-xl tracking-tight text-foreground">BioFit</span>
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-0.5">
             {navItems.map(({ to, icon: Icon, label }) => (
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   location.pathname === to
                     ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -93,20 +92,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-xl"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+
             {!loading && (
               user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
+                    <Button variant="ghost" size="icon" className="rounded-xl">
                       <Avatar className="w-8 h-8">
-                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold">
                           {displayName.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="rounded-xl">
                     <DropdownMenuItem className="text-xs text-muted-foreground" disabled>
                       {user.email}
                     </DropdownMenuItem>
@@ -116,7 +125,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild variant="outline" size="sm" className="gap-2">
+                <Button asChild variant="default" size="sm" className="gap-2 rounded-xl shadow-lg shadow-primary/20">
                   <Link to="/signin">
                     <LogIn className="w-4 h-4" /> Sign In
                   </Link>
@@ -126,18 +135,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* Collapsible mobile menu */}
         {menuOpen && (
-          <nav className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-sm">
-            <div className="container py-2 flex flex-col gap-1">
+          <nav className="md:hidden border-t border-border/30 bg-background/95 backdrop-blur-2xl">
+            <div className="container py-2 flex flex-col gap-0.5">
               {navItems.map(({ to, icon: Icon, label }) => (
                 <Link
                   key={to}
                   to={to}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     location.pathname === to
                       ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
                   <Icon className="w-5 h-5" />

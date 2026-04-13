@@ -6,6 +6,57 @@
 
 @layer base {
   :root {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    --primary: 145 80% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 10% 30%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 5% 46%;
+
+    --accent: 145 60% 38%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 145 80% 42%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 30%;
+    --sidebar-primary: 145 80% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 94%;
+    --sidebar-accent-foreground: 240 5% 30%;
+    --sidebar-border: 240 6% 90%;
+    --sidebar-ring: 145 80% 42%;
+
+    /* Custom BioFit tokens */
+    --biofit-glow: 145 80% 42%;
+    --biofit-glow-dim: 145 60% 35%;
+    --biofit-surface: 240 5% 96%;
+    --biofit-surface-hover: 240 5% 92%;
+    --biofit-amber: 38 92% 50%;
+    --biofit-blue: 210 100% 56%;
+    --biofit-purple: 270 70% 60%;
+    --biofit-red: 0 72% 51%;
+  }
+
+  .dark {
     --background: 220 20% 7%;
     --foreground: 0 0% 95%;
 
@@ -34,7 +85,7 @@
     --input: 220 15% 18%;
     --ring: 145 80% 50%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar-background: 220 18% 8%;
     --sidebar-foreground: 0 0% 85%;
@@ -45,7 +96,6 @@
     --sidebar-border: 220 15% 18%;
     --sidebar-ring: 145 80% 50%;
 
-    /* Custom BioFit tokens */
     --biofit-glow: 145 80% 50%;
     --biofit-glow-dim: 145 60% 35%;
     --biofit-surface: 220 18% 12%;
@@ -64,22 +114,25 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: -apple-system, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: -apple-system, 'SF Pro Display', 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
 }
 
 @layer utilities {
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border border-border/50 rounded-xl;
+    @apply bg-card/70 backdrop-blur-2xl border border-border/40 rounded-2xl shadow-sm;
   }
 
   .glow-border {
-    box-shadow: 0 0 15px -3px hsl(var(--primary) / 0.3),
-                0 0 6px -4px hsl(var(--primary) / 0.2);
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.25),
+                0 0 8px -4px hsl(var(--primary) / 0.15);
   }
 
   .text-gradient {
@@ -91,32 +144,42 @@
   }
 
   .animate-fade-up {
-    animation: fadeUp 0.5s ease-out both;
+    animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .animate-scale-in {
-    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+    animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  }
+
+  .ios-card {
+    @apply bg-card/80 backdrop-blur-2xl border border-border/30 rounded-2xl shadow-lg;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  }
+
+  .ios-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 20px 40px -12px hsl(var(--foreground) / 0.08);
   }
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0); }
+  from { opacity: 0; transform: scale(0.8); }
   to { opacity: 1; transform: scale(1); }
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: hsl(var(--background));
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 3px;
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 4px;
 }
