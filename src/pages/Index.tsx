@@ -68,7 +68,7 @@ export default function Index() {
             </div>
             <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">🔥 Daily Fuel</p>
-              <p className="text-sm font-medium text-foreground/90 italic leading-relaxed truncate">
+              <p className="text-sm font-medium text-foreground/90 italic leading-relaxed">
                 "{getQuote()}"
               </p>
             </div>
