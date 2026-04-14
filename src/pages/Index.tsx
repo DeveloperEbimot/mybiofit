@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import RatingPopup from "@/components/RatingPopup";
 import AdSense from "@/components/AdSense";
@@ -14,10 +14,6 @@ import {
   Sparkles,
   Zap,
   Target,
-  Trophy,
-  TrendingUp,
-  Timer,
-  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -133,20 +129,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ─── Stats Bar ─── */}
-      <section className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
-        <div className="grid grid-cols-4 gap-2">
-          {stats.map((s) => (
-            <div key={s.label} className="ios-card p-3 md:p-4 text-center">
-              <s.icon className={`w-5 h-5 mx-auto mb-1.5 ${s.color}`} />
-              <p className="font-display font-extrabold text-lg md:text-xl text-foreground">
-                <AnimatedCounter target={s.value} />
-              </p>
-              <p className="text-[10px] md:text-xs text-muted-foreground font-medium uppercase tracking-wider">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ─── Diet Goal Selector ─── */}
       <Suspense fallback={<div className="ios-card p-6 max-w-sm mx-auto h-24 animate-pulse" />}>
