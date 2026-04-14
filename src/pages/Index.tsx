@@ -51,16 +51,6 @@ const features = [
   { icon: MessageCircle, label: "AI Coach", desc: "Ask anything, anytime", to: "/chat", gradient: "from-primary to-accent" },
 ];
 
-const stats = [
-  { icon: Trophy, label: "Meals Tracked", value: "10K+", color: "text-biofit-amber" },
-  { icon: TrendingUp, label: "Goals Hit", value: "95%", color: "text-primary" },
-  { icon: Timer, label: "Avg Scan Time", value: "3s", color: "text-biofit-blue" },
-  { icon: Activity, label: "Active Users", value: "5K+", color: "text-biofit-purple" },
-];
-
-function AnimatedCounter({ target, suffix = "" }: { target: string; suffix?: string }) {
-  return <span className="tabular-nums">{target}{suffix}</span>;
-}
 
 export default function Index() {
   const { profile, updateProfile } = useUserProfile();
