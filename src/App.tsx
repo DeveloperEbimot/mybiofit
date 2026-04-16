@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
 import RouteChangeTracker from "@/components/RouteChangeTracker";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import "@/i18n";
 
 const Index = lazy(() => import("./pages/Index"));
 const ScanMeal = lazy(() => import("./pages/ScanMeal"));
@@ -25,6 +26,7 @@ const SignUp = lazy(() => import("./pages/SignUp"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const LanguageSelect = lazy(() => import("./pages/LanguageSelect"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -56,6 +58,7 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/language" element={<LanguageSelect />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

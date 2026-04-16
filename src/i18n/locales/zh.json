@@ -1,0 +1,102 @@
+{
+  "app_name": "BioFit",
+  "nav": {
+    "home": "首页",
+    "scan": "扫描",
+    "recipes": "食谱",
+    "grocery": "购物",
+    "fitness": "健身",
+    "bmi": "BMI",
+    "chat": "聊天",
+    "stats": "统计"
+  },
+  "auth": {
+    "sign_in": "登录",
+    "sign_out": "退出",
+    "sign_up": "注册",
+    "forgot_password": "忘记密码？",
+    "reset_password": "重置密码"
+  },
+  "home": {
+    "daily_fuel": "🔥 每日动力",
+    "ai_powered": "AI 驱动健身",
+    "headline": "聪明训练。",
+    "headline2": "更聪明地吃。",
+    "subtitle": "你的AI营养、健身和健康教练。拍照记录饮食，达成目标，追踪进展。",
+    "start_now": "立即开始",
+    "talk_to_coach": "与教练对话",
+    "free_forever": "永久免费 · 无需信用卡",
+    "your_toolkit": "你的工具箱",
+    "ready": "准备好挑战了吗？",
+    "ready_desc": "加入数千名更聪明地饮食、更努力训练的运动员。",
+    "get_started": "开始",
+    "browse_recipes": "浏览食谱",
+    "contact_us": "联系我们"
+  },
+  "features": {
+    "scan_meal": "扫描餐食",
+    "scan_desc": "AI拍照营养分析",
+    "recipes": "食谱",
+    "recipes_desc": "匹配你目标的食谱",
+    "grocery_list": "购物清单",
+    "grocery_desc": "智能购物清单",
+    "fitness_plan": "健身计划",
+    "fitness_desc": "为你定制的训练",
+    "bmi_calculator": "BMI计算器",
+    "bmi_desc": "追踪你的身体成分",
+    "ai_coach": "AI教练",
+    "ai_coach_desc": "随时随地提问"
+  },
+  "language": {
+    "title": "选择你的语言",
+    "subtitle": "选择你的首选语言以开始",
+    "continue": "继续",
+    "change": "语言"
+  },
+  "onboarding": {
+    "title": "完善你的资料",
+    "subtitle": "帮助我们为你个性化体验",
+    "age": "年龄",
+    "weight": "体重 (kg)",
+    "height": "身高 (cm)",
+    "gender": "性别",
+    "male": "男",
+    "female": "女",
+    "other": "其他",
+    "activity_level": "活动水平",
+    "sedentary": "久坐",
+    "light": "轻度活动",
+    "moderate": "中度活动",
+    "active": "高度活动",
+    "extreme": "极度活动",
+    "diet_goal": "饮食目标",
+    "weight_loss": "减重",
+    "muscle_gain": "增肌",
+    "maintenance": "维持",
+    "healthy_eating": "健康饮食",
+    "restrictions": "饮食限制",
+    "saving": "保存中...",
+    "get_started": "开始",
+    "your_bmi": "你的BMI",
+    "profile_saved": "资料已保存！",
+    "welcome": "欢迎来到BioFit 🎉",
+    "error_saving": "保存资料时出错"
+  },
+  "diet_goal": {
+    "title": "你的目标",
+    "weight_loss": "减重",
+    "muscle_gain": "增肌",
+    "maintenance": "维持",
+    "healthy_eating": "健康饮食"
+  },
+  "quotes": [
+    "你的身体几乎能承受一切。需要说服的是你的大脑。",
+    "唯一糟糕的锻炼就是没有发生的那次。",
+    "每天的小进步带来惊人的成果。",
+    "不要停下，直到你为自己骄傲。",
+    "自律就是在你现在想要的和你最想要的之间做选择。",
+    "冠军不是在健身房里练成的。冠军源于内心深处。",
+    "汗水只是脂肪在哭泣。",
+    "今天感受到的痛苦将成为明天感受到的力量。"
+  ]
+}

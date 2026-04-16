@@ -1,0 +1,102 @@
+{
+  "app_name": "BioFit",
+  "nav": {
+    "home": "Início",
+    "scan": "Escanear",
+    "recipes": "Receitas",
+    "grocery": "Compras",
+    "fitness": "Fitness",
+    "bmi": "IMC",
+    "chat": "Chat",
+    "stats": "Estatísticas"
+  },
+  "auth": {
+    "sign_in": "Entrar",
+    "sign_out": "Sair",
+    "sign_up": "Cadastrar",
+    "forgot_password": "Esqueceu a senha?",
+    "reset_password": "Redefinir Senha"
+  },
+  "home": {
+    "daily_fuel": "🔥 Motivação Diária",
+    "ai_powered": "Fitness com IA",
+    "headline": "Treine com Inteligência.",
+    "headline2": "Coma Melhor.",
+    "subtitle": "Seu coach de IA para nutrição, fitness e bem-estar. Fotografe refeições, conquiste metas, acompanhe o progresso.",
+    "start_now": "Começar Agora",
+    "talk_to_coach": "Falar com Coach",
+    "free_forever": "Grátis para sempre · Sem cartão",
+    "your_toolkit": "Suas Ferramentas",
+    "ready": "Pronto pra Mandar Ver?",
+    "ready_desc": "Junte-se a milhares de atletas que comem melhor e treinam mais forte.",
+    "get_started": "Começar",
+    "browse_recipes": "Ver Receitas",
+    "contact_us": "Fale Conosco"
+  },
+  "features": {
+    "scan_meal": "Escanear Refeição",
+    "scan_desc": "Análise nutricional por IA a partir de uma foto",
+    "recipes": "Receitas",
+    "recipes_desc": "Receitas alinhadas aos seus objetivos",
+    "grocery_list": "Lista de Compras",
+    "grocery_desc": "Listas de compras inteligentes",
+    "fitness_plan": "Plano Fitness",
+    "fitness_desc": "Treinos personalizados pra você",
+    "bmi_calculator": "Calculadora IMC",
+    "bmi_desc": "Acompanhe sua composição corporal",
+    "ai_coach": "Coach IA",
+    "ai_coach_desc": "Pergunte qualquer coisa, a qualquer hora"
+  },
+  "language": {
+    "title": "Escolha seu Idioma",
+    "subtitle": "Selecione seu idioma preferido para começar",
+    "continue": "Continuar",
+    "change": "Idioma"
+  },
+  "onboarding": {
+    "title": "Complete seu Perfil",
+    "subtitle": "Nos ajude a personalizar sua experiência",
+    "age": "Idade",
+    "weight": "Peso (kg)",
+    "height": "Altura (cm)",
+    "gender": "Gênero",
+    "male": "Masculino",
+    "female": "Feminino",
+    "other": "Outro",
+    "activity_level": "Nível de Atividade",
+    "sedentary": "Sedentário",
+    "light": "Pouco Ativo",
+    "moderate": "Moderadamente Ativo",
+    "active": "Muito Ativo",
+    "extreme": "Extremamente Ativo",
+    "diet_goal": "Objetivo da Dieta",
+    "weight_loss": "Perda de Peso",
+    "muscle_gain": "Ganho Muscular",
+    "maintenance": "Manutenção",
+    "healthy_eating": "Alimentação Saudável",
+    "restrictions": "Restrições Alimentares",
+    "saving": "Salvando...",
+    "get_started": "Começar",
+    "your_bmi": "Seu IMC",
+    "profile_saved": "Perfil salvo!",
+    "welcome": "Bem-vindo ao BioFit 🎉",
+    "error_saving": "Erro ao salvar perfil"
+  },
+  "diet_goal": {
+    "title": "Seu Objetivo",
+    "weight_loss": "Perda de Peso",
+    "muscle_gain": "Ganho Muscular",
+    "maintenance": "Manutenção",
+    "healthy_eating": "Alimentação Saudável"
+  },
+  "quotes": [
+    "Seu corpo aguenta quase tudo. É sua mente que você precisa convencer.",
+    "O único treino ruim é aquele que não aconteceu.",
+    "Pequenas melhorias diárias levam a resultados impressionantes.",
+    "Não pare até se orgulhar.",
+    "Disciplina é escolher entre o que você quer agora e o que você mais quer.",
+    "Campeões não são feitos nas academias. Campeões vêm de algo profundo lá dentro.",
+    "Suor é só gordura chorando.",
+    "A dor que você sente hoje será a força que sentirá amanhã."
+  ]
+}
