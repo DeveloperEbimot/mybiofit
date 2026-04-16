@@ -1,0 +1,102 @@
+{
+  "app_name": "BioFit",
+  "nav": {
+    "home": "Start",
+    "scan": "Scannen",
+    "recipes": "Rezepte",
+    "grocery": "Einkauf",
+    "fitness": "Fitness",
+    "bmi": "BMI",
+    "chat": "Chat",
+    "stats": "Statistiken"
+  },
+  "auth": {
+    "sign_in": "Anmelden",
+    "sign_out": "Abmelden",
+    "sign_up": "Registrieren",
+    "forgot_password": "Passwort vergessen?",
+    "reset_password": "Passwort zurücksetzen"
+  },
+  "home": {
+    "daily_fuel": "🔥 Tägliche Motivation",
+    "ai_powered": "KI-gestütztes Fitness",
+    "headline": "Trainiere Smart.",
+    "headline2": "Iss Smarter.",
+    "subtitle": "Dein KI-Coach für Ernährung, Fitness & Wellness. Mahlzeiten scannen, Ziele erreichen, Fortschritt verfolgen.",
+    "start_now": "Jetzt Starten",
+    "talk_to_coach": "Mit Coach Sprechen",
+    "free_forever": "Für immer kostenlos · Keine Kreditkarte",
+    "your_toolkit": "Deine Werkzeuge",
+    "ready": "Bereit Durchzustarten?",
+    "ready_desc": "Schließe dich tausenden Athleten an, die klüger essen und härter trainieren.",
+    "get_started": "Los Geht's",
+    "browse_recipes": "Rezepte Ansehen",
+    "contact_us": "Kontakt"
+  },
+  "features": {
+    "scan_meal": "Mahlzeit Scannen",
+    "scan_desc": "KI-gestützte Nährwertanalyse per Foto",
+    "recipes": "Rezepte",
+    "recipes_desc": "Rezepte passend zu deinen Zielen",
+    "grocery_list": "Einkaufsliste",
+    "grocery_desc": "Intelligente Einkaufslisten",
+    "fitness_plan": "Fitnessplan",
+    "fitness_desc": "Auf dich zugeschnittene Workouts",
+    "bmi_calculator": "BMI-Rechner",
+    "bmi_desc": "Verfolge deine Körperzusammensetzung",
+    "ai_coach": "KI-Coach",
+    "ai_coach_desc": "Frag jederzeit alles"
+  },
+  "language": {
+    "title": "Wähle deine Sprache",
+    "subtitle": "Wähle deine bevorzugte Sprache um zu beginnen",
+    "continue": "Weiter",
+    "change": "Sprache"
+  },
+  "onboarding": {
+    "title": "Profil Vervollständigen",
+    "subtitle": "Hilf uns dein Erlebnis zu personalisieren",
+    "age": "Alter",
+    "weight": "Gewicht (kg)",
+    "height": "Größe (cm)",
+    "gender": "Geschlecht",
+    "male": "Männlich",
+    "female": "Weiblich",
+    "other": "Andere",
+    "activity_level": "Aktivitätslevel",
+    "sedentary": "Sitzend",
+    "light": "Leicht Aktiv",
+    "moderate": "Mäßig Aktiv",
+    "active": "Sehr Aktiv",
+    "extreme": "Extrem Aktiv",
+    "diet_goal": "Ernährungsziel",
+    "weight_loss": "Abnehmen",
+    "muscle_gain": "Muskelaufbau",
+    "maintenance": "Erhaltung",
+    "healthy_eating": "Gesunde Ernährung",
+    "restrictions": "Ernährungseinschränkungen",
+    "saving": "Wird gespeichert...",
+    "get_started": "Los Geht's",
+    "your_bmi": "Dein BMI",
+    "profile_saved": "Profil gespeichert!",
+    "welcome": "Willkommen bei BioFit 🎉",
+    "error_saving": "Fehler beim Speichern"
+  },
+  "diet_goal": {
+    "title": "Dein Ziel",
+    "weight_loss": "Abnehmen",
+    "muscle_gain": "Muskelaufbau",
+    "maintenance": "Erhaltung",
+    "healthy_eating": "Gesunde Ernährung"
+  },
+  "quotes": [
+    "Dein Körper kann fast alles aushalten. Es ist dein Geist, den du überzeugen musst.",
+    "Das einzige schlechte Training ist das, das nicht stattgefunden hat.",
+    "Kleine tägliche Verbesserungen führen zu erstaunlichen Ergebnissen.",
+    "Hör nicht auf, bis du stolz bist.",
+    "Disziplin ist die Wahl zwischen dem, was du jetzt willst, und dem, was du am meisten willst.",
+    "Champions werden nicht im Fitnessstudio gemacht. Champions kommen von tief innen.",
+    "Schweiß ist nur Fett, das weint.",
+    "Der Schmerz, den du heute fühlst, wird die Stärke sein, die du morgen fühlst."
+  ]
+}

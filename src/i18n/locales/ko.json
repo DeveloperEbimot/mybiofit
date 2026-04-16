@@ -1,0 +1,102 @@
+{
+  "app_name": "BioFit",
+  "nav": {
+    "home": "홈",
+    "scan": "스캔",
+    "recipes": "레시피",
+    "grocery": "장보기",
+    "fitness": "피트니스",
+    "bmi": "BMI",
+    "chat": "채팅",
+    "stats": "통계"
+  },
+  "auth": {
+    "sign_in": "로그인",
+    "sign_out": "로그아웃",
+    "sign_up": "회원가입",
+    "forgot_password": "비밀번호를 잊으셨나요?",
+    "reset_password": "비밀번호 재설정"
+  },
+  "home": {
+    "daily_fuel": "🔥 오늘의 동기부여",
+    "ai_powered": "AI 기반 피트니스",
+    "headline": "스마트하게 훈련.",
+    "headline2": "더 스마트하게 먹기.",
+    "subtitle": "영양, 피트니스, 웰니스를 위한 AI 코치. 식사 촬영, 목표 달성, 진행 추적.",
+    "start_now": "지금 시작",
+    "talk_to_coach": "코치와 대화",
+    "free_forever": "영원히 무료 · 카드 불필요",
+    "your_toolkit": "나의 도구",
+    "ready": "도전할 준비 됐나요?",
+    "ready_desc": "더 똑똑하게 먹고 더 열심히 훈련하는 수천 명의 운동선수와 함께하세요.",
+    "get_started": "시작하기",
+    "browse_recipes": "레시피 보기",
+    "contact_us": "문의하기"
+  },
+  "features": {
+    "scan_meal": "식사 스캔",
+    "scan_desc": "사진으로 AI 영양 분석",
+    "recipes": "레시피",
+    "recipes_desc": "목표에 맞는 레시피",
+    "grocery_list": "장보기 목록",
+    "grocery_desc": "스마트 쇼핑 리스트",
+    "fitness_plan": "피트니스 플랜",
+    "fitness_desc": "맞춤 운동 프로그램",
+    "bmi_calculator": "BMI 계산기",
+    "bmi_desc": "체성분 추적",
+    "ai_coach": "AI 코치",
+    "ai_coach_desc": "언제든 무엇이든 물어보세요"
+  },
+  "language": {
+    "title": "언어를 선택하세요",
+    "subtitle": "시작하려면 원하는 언어를 선택하세요",
+    "continue": "계속",
+    "change": "언어"
+  },
+  "onboarding": {
+    "title": "프로필 완성",
+    "subtitle": "경험을 맞춤화할 수 있도록 도와주세요",
+    "age": "나이",
+    "weight": "체중 (kg)",
+    "height": "키 (cm)",
+    "gender": "성별",
+    "male": "남성",
+    "female": "여성",
+    "other": "기타",
+    "activity_level": "활동 수준",
+    "sedentary": "좌식",
+    "light": "가벼운 활동",
+    "moderate": "보통 활동",
+    "active": "매우 활동적",
+    "extreme": "극도로 활동적",
+    "diet_goal": "식단 목표",
+    "weight_loss": "체중 감량",
+    "muscle_gain": "근육 증가",
+    "maintenance": "유지",
+    "healthy_eating": "건강한 식사",
+    "restrictions": "식이 제한",
+    "saving": "저장 중...",
+    "get_started": "시작하기",
+    "your_bmi": "나의 BMI",
+    "profile_saved": "프로필 저장됨!",
+    "welcome": "BioFit에 오신 것을 환영합니다 🎉",
+    "error_saving": "프로필 저장 오류"
+  },
+  "diet_goal": {
+    "title": "나의 목표",
+    "weight_loss": "체중 감량",
+    "muscle_gain": "근육 증가",
+    "maintenance": "유지",
+    "healthy_eating": "건강한 식사"
+  },
+  "quotes": [
+    "몸은 거의 모든 것을 견딜 수 있다. 설득해야 할 건 마음이다.",
+    "유일한 나쁜 운동은 하지 않은 운동이다.",
+    "매일의 작은 개선이 놀라운 결과를 만든다.",
+    "자랑스러울 때까지 멈추지 마라.",
+    "규율은 지금 원하는 것과 가장 원하는 것 사이에서 선택하는 것이다.",
+    "챔피언은 체육관에서 만들어지지 않는다. 챔피언은 내면 깊은 곳에서 만들어진다.",
+    "땀은 지방이 우는 것이다.",
+    "오늘 느끼는 고통이 내일 느낄 힘이 될 것이다."
+  ]
+}

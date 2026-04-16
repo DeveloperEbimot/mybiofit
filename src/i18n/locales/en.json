@@ -1,0 +1,102 @@
+{
+  "app_name": "BioFit",
+  "nav": {
+    "home": "Home",
+    "scan": "Scan",
+    "recipes": "Recipes",
+    "grocery": "Grocery",
+    "fitness": "Fitness",
+    "bmi": "BMI",
+    "chat": "Chat",
+    "stats": "Stats"
+  },
+  "auth": {
+    "sign_in": "Sign In",
+    "sign_out": "Sign Out",
+    "sign_up": "Sign Up",
+    "forgot_password": "Forgot Password?",
+    "reset_password": "Reset Password"
+  },
+  "home": {
+    "daily_fuel": "🔥 Daily Fuel",
+    "ai_powered": "AI-Powered Fitness",
+    "headline": "Train Smart.",
+    "headline2": "Eat Smarter.",
+    "subtitle": "Your AI-powered coach for nutrition, fitness & wellness. Snap meals, crush goals, track progress.",
+    "start_now": "Start Now",
+    "talk_to_coach": "Talk to Coach",
+    "free_forever": "Free forever · No credit card",
+    "your_toolkit": "Your Toolkit",
+    "ready": "Ready to Crush It?",
+    "ready_desc": "Join thousands of athletes eating smarter and training harder.",
+    "get_started": "Get Started",
+    "browse_recipes": "Browse Recipes",
+    "contact_us": "Contact Us"
+  },
+  "features": {
+    "scan_meal": "Scan Meal",
+    "scan_desc": "AI-powered nutrition analysis from a photo",
+    "recipes": "Recipes",
+    "recipes_desc": "Recipes matched to your goals",
+    "grocery_list": "Grocery List",
+    "grocery_desc": "Smart shopping lists",
+    "fitness_plan": "Fitness Plan",
+    "fitness_desc": "Workouts tailored to you",
+    "bmi_calculator": "BMI Calculator",
+    "bmi_desc": "Track your body composition",
+    "ai_coach": "AI Coach",
+    "ai_coach_desc": "Ask anything, anytime"
+  },
+  "language": {
+    "title": "Choose Your Language",
+    "subtitle": "Select your preferred language to get started",
+    "continue": "Continue",
+    "change": "Language"
+  },
+  "onboarding": {
+    "title": "Complete Your Profile",
+    "subtitle": "Help us personalize your experience",
+    "age": "Age",
+    "weight": "Weight (kg)",
+    "height": "Height (cm)",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "activity_level": "Activity Level",
+    "sedentary": "Sedentary",
+    "light": "Lightly Active",
+    "moderate": "Moderately Active",
+    "active": "Very Active",
+    "extreme": "Extremely Active",
+    "diet_goal": "Diet Goal",
+    "weight_loss": "Weight Loss",
+    "muscle_gain": "Muscle Gain",
+    "maintenance": "Maintenance",
+    "healthy_eating": "Healthy Eating",
+    "restrictions": "Dietary Restrictions",
+    "saving": "Saving...",
+    "get_started": "Get Started",
+    "your_bmi": "Your BMI",
+    "profile_saved": "Profile saved!",
+    "welcome": "Welcome to BioFit 🎉",
+    "error_saving": "Error saving profile"
+  },
+  "diet_goal": {
+    "title": "Your Goal",
+    "weight_loss": "Weight Loss",
+    "muscle_gain": "Muscle Gain",
+    "maintenance": "Maintenance",
+    "healthy_eating": "Healthy Eating"
+  },
+  "quotes": [
+    "Your body can stand almost anything. It's your mind that you have to convince.",
+    "The only bad workout is the one that didn't happen.",
+    "Small daily improvements lead to stunning results.",
+    "Don't stop until you're proud.",
+    "Discipline is choosing between what you want now and what you want most.",
+    "Champions aren't made in gyms. Champions are made from something deep inside.",
+    "Sweat is just fat crying.",
+    "The pain you feel today will be the strength you feel tomorrow."
+  ]
+}
