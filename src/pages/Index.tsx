@@ -154,7 +154,7 @@ export default function Index() {
         <div className="flex items-center justify-center gap-3 mb-6">
           <div className="h-px flex-1 max-w-16 bg-gradient-to-r from-transparent to-border" />
           <h2 className="font-display text-2xl font-extrabold text-foreground text-center tracking-tight uppercase">
-            {t("home.your_toolkit")}
+            {user ? t("home.your_dashboard") : t("home.your_toolkit")}
           </h2>
           <div className="h-px flex-1 max-w-16 bg-gradient-to-l from-transparent to-border" />
         </div>
