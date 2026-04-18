@@ -31,7 +31,12 @@
     "ready_desc": "हज़ारों एथलीट्स से जुड़ें जो बेहतर खाते और मेहनत से ट्रेन करते हैं।",
     "get_started": "शुरू करें",
     "browse_recipes": "रेसिपी देखें",
-    "contact_us": "संपर्क करें"
+    "contact_us": "संपर्क करें",
+    "welcome_back": "वापसी पर स्वागत है",
+    "hi_user": "नमस्ते, {{name}} 👋",
+    "personal_subtitle": "आज भी स्वस्थ आदतें बनाते रहें।",
+    "your_dashboard": "आपका डैशबोर्ड",
+    "friend": "दोस्त"
   },
   "features": {
     "scan_meal": "भोजन स्कैन",

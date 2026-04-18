@@ -31,7 +31,12 @@
     "ready_desc": "加入数千名更聪明地饮食、更努力训练的运动员。",
     "get_started": "开始",
     "browse_recipes": "浏览食谱",
-    "contact_us": "联系我们"
+    "contact_us": "联系我们",
+    "welcome_back": "欢迎回来",
+    "hi_user": "你好,{{name}} 👋",
+    "personal_subtitle": "让我们今天继续培养健康习惯。",
+    "your_dashboard": "你的面板",
+    "friend": "朋友"
   },
   "features": {
     "scan_meal": "扫描餐食",

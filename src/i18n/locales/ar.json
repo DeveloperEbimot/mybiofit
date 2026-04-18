@@ -31,7 +31,12 @@
     "ready_desc": "انضم لآلاف الرياضيين الذين يأكلون بذكاء ويتدربون بقوة.",
     "get_started": "ابدأ",
     "browse_recipes": "تصفح الوصفات",
-    "contact_us": "اتصل بنا"
+    "contact_us": "اتصل بنا",
+    "welcome_back": "مرحبًا بعودتك",
+    "hi_user": "مرحبًا، {{name}} 👋",
+    "personal_subtitle": "لنواصل بناء عادات صحية اليوم.",
+    "your_dashboard": "لوحتك",
+    "friend": "صديق"
   },
   "features": {
     "scan_meal": "مسح الوجبة",

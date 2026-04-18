@@ -31,7 +31,12 @@
     "ready_desc": "より賢く食べ、より強くトレーニングする数千人のアスリートに参加しよう。",
     "get_started": "始める",
     "browse_recipes": "レシピを見る",
-    "contact_us": "お問い合わせ"
+    "contact_us": "お問い合わせ",
+    "welcome_back": "おかえりなさい",
+    "hi_user": "こんにちは、{{name}}さん 👋",
+    "personal_subtitle": "今日も健康的な習慣を続けましょう。",
+    "your_dashboard": "ダッシュボード",
+    "friend": "友達"
   },
   "features": {
     "scan_meal": "食事スキャン",
