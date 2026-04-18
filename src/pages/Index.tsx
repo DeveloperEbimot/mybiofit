@@ -28,6 +28,12 @@ export default function Index() {
   const { user } = useAuth();
   const { t } = useTranslation();
 
+  const displayName =
+    (user?.user_metadata?.full_name as string | undefined)?.split(" ")[0] ||
+    (user?.user_metadata?.name as string | undefined)?.split(" ")[0] ||
+    user?.email?.split("@")[0] ||
+    t("home.friend");
+
   const quotes = t("quotes", { returnObjects: true }) as string[];
   const getQuote = () => {
     const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
@@ -79,23 +85,38 @@ export default function Index() {
         </div>
 
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 text-xs font-bold uppercase tracking-widest text-primary">
-            <Zap className="w-3.5 h-3.5" />
-            {t("home.ai_powered")}
-          </div>
-
-          <h1 className="font-display text-4xl md:text-6xl font-extrabold mb-4 leading-[1.1] tracking-tight">
-            {t("home.headline")}{" "}
-            <br className="hidden md:block" />
-            <span className="text-gradient">{t("home.headline2")}</span>
-          </h1>
-
-          <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto mb-8 leading-relaxed">
-            {t("home.subtitle")}
-          </p>
-
-          {!user && (
+          {user ? (
             <>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 text-xs font-bold uppercase tracking-widest text-primary">
+                <Sparkles className="w-3.5 h-3.5" />
+                {t("home.welcome_back")}
+              </div>
+
+              <h1 className="font-display text-4xl md:text-6xl font-extrabold mb-4 leading-[1.1] tracking-tight">
+                <span className="text-gradient">{t("home.hi_user", { name: displayName })}</span>
+              </h1>
+
+              <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto mb-2 leading-relaxed">
+                {t("home.personal_subtitle")}
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 text-xs font-bold uppercase tracking-widest text-primary">
+                <Zap className="w-3.5 h-3.5" />
+                {t("home.ai_powered")}
+              </div>
+
+              <h1 className="font-display text-4xl md:text-6xl font-extrabold mb-4 leading-[1.1] tracking-tight">
+                {t("home.headline")}{" "}
+                <br className="hidden md:block" />
+                <span className="text-gradient">{t("home.headline2")}</span>
+              </h1>
+
+              <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto mb-8 leading-relaxed">
+                {t("home.subtitle")}
+              </p>
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
                 <Button asChild size="lg" className="text-base px-8 gap-2 rounded-2xl shadow-xl shadow-primary/25 h-13 font-bold uppercase tracking-wide">
                   <Link to="/scan">
@@ -133,7 +154,7 @@ export default function Index() {
         <div className="flex items-center justify-center gap-3 mb-6">
           <div className="h-px flex-1 max-w-16 bg-gradient-to-r from-transparent to-border" />
           <h2 className="font-display text-2xl font-extrabold text-foreground text-center tracking-tight uppercase">
-            {t("home.your_toolkit")}
+            {user ? t("home.your_dashboard") : t("home.your_toolkit")}
           </h2>
           <div className="h-px flex-1 max-w-16 bg-gradient-to-l from-transparent to-border" />
         </div>

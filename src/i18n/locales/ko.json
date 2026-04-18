@@ -31,7 +31,12 @@
     "ready_desc": "더 똑똑하게 먹고 더 열심히 훈련하는 수천 명의 운동선수와 함께하세요.",
     "get_started": "시작하기",
     "browse_recipes": "레시피 보기",
-    "contact_us": "문의하기"
+    "contact_us": "문의하기",
+    "welcome_back": "다시 오신 것을 환영합니다",
+    "hi_user": "안녕하세요, {{name}}님 👋",
+    "personal_subtitle": "오늘도 건강한 습관을 이어가요.",
+    "your_dashboard": "대시보드",
+    "friend": "친구"
   },
   "features": {
     "scan_meal": "식사 스캔",

@@ -31,7 +31,12 @@
     "ready_desc": "Schließe dich tausenden Athleten an, die klüger essen und härter trainieren.",
     "get_started": "Los Geht's",
     "browse_recipes": "Rezepte Ansehen",
-    "contact_us": "Kontakt"
+    "contact_us": "Kontakt",
+    "welcome_back": "Willkommen zurück",
+    "hi_user": "Hallo, {{name}} 👋",
+    "personal_subtitle": "Lass uns heute weiter gesunde Gewohnheiten aufbauen.",
+    "your_dashboard": "Dein Dashboard",
+    "friend": "Freund"
   },
   "features": {
     "scan_meal": "Mahlzeit Scannen",

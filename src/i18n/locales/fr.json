@@ -31,7 +31,12 @@
     "ready_desc": "Rejoins des milliers d'athlètes qui mangent mieux et s'entraînent plus dur.",
     "get_started": "Commencer",
     "browse_recipes": "Voir les Recettes",
-    "contact_us": "Nous Contacter"
+    "contact_us": "Nous Contacter",
+    "welcome_back": "Bon retour",
+    "hi_user": "Salut, {{name}} 👋",
+    "personal_subtitle": "Continuons à bâtir des habitudes saines aujourd'hui.",
+    "your_dashboard": "Votre Tableau",
+    "friend": "ami"
   },
   "features": {
     "scan_meal": "Scanner Repas",
