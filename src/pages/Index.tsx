@@ -28,6 +28,12 @@ export default function Index() {
   const { user } = useAuth();
   const { t } = useTranslation();
 
+  const displayName =
+    (user?.user_metadata?.full_name as string | undefined)?.split(" ")[0] ||
+    (user?.user_metadata?.name as string | undefined)?.split(" ")[0] ||
+    user?.email?.split("@")[0] ||
+    t("home.friend");
+
   const quotes = t("quotes", { returnObjects: true }) as string[];
   const getQuote = () => {
     const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
