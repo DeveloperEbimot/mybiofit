@@ -31,7 +31,12 @@
     "ready_desc": "Join thousands of athletes eating smarter and training harder.",
     "get_started": "Get Started",
     "browse_recipes": "Browse Recipes",
-    "contact_us": "Contact Us"
+    "contact_us": "Contact Us",
+    "welcome_back": "Welcome back",
+    "hi_user": "Hi, {{name}} 👋",
+    "personal_subtitle": "Let's keep building healthy habits today.",
+    "your_dashboard": "Your Dashboard",
+    "friend": "friend"
   },
   "features": {
     "scan_meal": "Scan Meal",
