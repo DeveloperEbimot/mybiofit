@@ -85,23 +85,38 @@ export default function Index() {
         </div>
 
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 text-xs font-bold uppercase tracking-widest text-primary">
-            <Zap className="w-3.5 h-3.5" />
-            {t("home.ai_powered")}
-          </div>
-
-          <h1 className="font-display text-4xl md:text-6xl font-extrabold mb-4 leading-[1.1] tracking-tight">
-            {t("home.headline")}{" "}
-            <br className="hidden md:block" />
-            <span className="text-gradient">{t("home.headline2")}</span>
-          </h1>
-
-          <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto mb-8 leading-relaxed">
-            {t("home.subtitle")}
-          </p>
-
-          {!user && (
+          {user ? (
             <>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 text-xs font-bold uppercase tracking-widest text-primary">
+                <Sparkles className="w-3.5 h-3.5" />
+                {t("home.welcome_back")}
+              </div>
+
+              <h1 className="font-display text-4xl md:text-6xl font-extrabold mb-4 leading-[1.1] tracking-tight">
+                <span className="text-gradient">{t("home.hi_user", { name: displayName })}</span>
+              </h1>
+
+              <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto mb-2 leading-relaxed">
+                {t("home.personal_subtitle")}
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6 text-xs font-bold uppercase tracking-widest text-primary">
+                <Zap className="w-3.5 h-3.5" />
+                {t("home.ai_powered")}
+              </div>
+
+              <h1 className="font-display text-4xl md:text-6xl font-extrabold mb-4 leading-[1.1] tracking-tight">
+                {t("home.headline")}{" "}
+                <br className="hidden md:block" />
+                <span className="text-gradient">{t("home.headline2")}</span>
+              </h1>
+
+              <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto mb-8 leading-relaxed">
+                {t("home.subtitle")}
+              </p>
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
                 <Button asChild size="lg" className="text-base px-8 gap-2 rounded-2xl shadow-xl shadow-primary/25 h-13 font-bold uppercase tracking-wide">
                   <Link to="/scan">
