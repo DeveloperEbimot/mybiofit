@@ -50,7 +50,7 @@ export default function Index() {
   ];
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className="space-y-10 md:space-y-8 pb-10 md:pb-8">
       <RatingPopup />
 
       {/* ─── Motivational Quote Banner ─── */}

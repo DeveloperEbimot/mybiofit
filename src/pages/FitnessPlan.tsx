@@ -1,294 +1,337 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Dumbbell, Loader2, RefreshCw, Trash2, ChevronDown, ChevronRight, Calendar, Target, AlertTriangle, Lightbulb } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Dumbbell, Play, Pause, SkipForward, RotateCcw, Check, ArrowLeft, Trophy, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useUserProfile } from "@/hooks/useUserProfile";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import ReactMarkdown from "react-markdown";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { MUSCLE_GROUPS, buildWorkout, type MuscleGroup, type Exercise } from "@/lib/exercises";
 import { toast } from "sonner";
 
-const planTypes = [
-  { value: "weight-loss", label: "Weight Loss" },
-  { value: "muscle-gain", label: "Muscle Gain" },
-  { value: "endurance", label: "Endurance" },
-  { value: "flexibility", label: "Flexibility & Mobility" },
-  { value: "hiit", label: "HIIT Training" },
-  { value: "strength", label: "Strength Training" },
-  { value: "beginner", label: "Beginner Friendly" },
-];
+type Phase = "select" | "ready" | "exercise" | "rest" | "done";
 
 export default function FitnessPlan() {
-  const { profile } = useUserProfile();
-  const { user } = useAuth();
-  const [planType, setPlanType] = useState(profile.dietGoal === "muscle-gain" ? "muscle-gain" : "weight-loss");
-  const [plan, setPlan] = useState("");
-  const [planId, setPlanId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [expandedWeeks, setExpandedWeeks] = useState<Record<number, boolean>>({ 0: true });
+  const [muscle, setMuscle] = useState<MuscleGroup | null>(null);
+  const [workout, setWorkout] = useState<Exercise[]>([]);
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<Phase>("select");
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      supabase.from("fitness_plans").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1)
-        .then(({ data }) => {
-          if (data && data.length > 0) {
-            setPlan(data[0].content);
-            setPlanType(data[0].plan_type);
-            setPlanId(data[0].id);
-          }
-        });
-    } else {
-      const saved = localStorage.getItem("biofit-fitness-plan");
-      if (saved) setPlan(saved);
-    }
-  }, [user]);
+  const current = workout[index];
+  const next = workout[index + 1];
 
-  const generatePlan = async () => {
-    setLoading(true);
-    setPlan("");
-    setExpandedWeeks({ 0: true });
-
+  // Beep helper
+  const beep = (freq = 880, duration = 120) => {
+    if (muted) return;
     try {
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          messages: [{
-            role: "user",
-            content: `Create a detailed 4-week ${planType} fitness plan for me. My profile: Age ${profile.age}, ${profile.gender}, ${profile.weight}kg, ${profile.height}cm, activity level: ${profile.activityLevel}.
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration / 1000);
+      osc.start();
+      osc.stop(ctx.currentTime + duration / 1000);
+    } catch {}
+  };
 
-Structure your response EXACTLY like this using markdown:
+  // Timer
+  useEffect(() => {
+    if (paused) return;
+    if (phase !== "exercise" && phase !== "rest" && phase !== "ready") return;
 
-# 🏋️ [Plan Title]
-
-Brief overview paragraph.
-
-## Week 1: [Week Theme]
-
-### Day 1: [Muscle Group / Focus]
-**Warm-up (5-10 min)**
-- Exercise 1
-
-**Main Workout**
-
-#### 1. [Exercise Name]
-- **Sets × Reps:** 3 × 12
-- **How to do it:** Step by step numbered instructions
-- **Common mistakes:** What to avoid
-- **Beginner modification:** Easier alternative
-
-#### 2. [Exercise Name]
-...repeat format
-
-**Cool-down (5-10 min)**
-- Stretches
-
-### Day 2: [Focus]
-...
-
-### Rest Day
-...
-
-## Week 2: [Week Theme]
-...continue same format with progressive difficulty
-
-## Week 3: [Week Theme]
-...
-
-## Week 4: [Week Theme]
-...
-
-## 💡 Tips & Notes
-- Recovery advice
-- Nutrition tips
-
-Use this exact formatting. Keep exercises clear and well-structured.`
-          }],
-        }),
-      });
-
-      if (!resp.ok || !resp.body) throw new Error("Failed");
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "", result = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        let idx;
-        while ((idx = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, idx);
-          buffer = buffer.slice(idx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") break;
-          try {
-            const p = JSON.parse(json);
-            const c = p.choices?.[0]?.delta?.content;
-            if (c) { result += c; setPlan(result); }
-          } catch { buffer = line + "\n" + buffer; break; }
+    intervalRef.current = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          // transition
+          if (phase === "ready") {
+            setPhase("exercise");
+            beep(1200, 200);
+            return current?.duration ?? 30;
+          }
+          if (phase === "exercise") {
+            beep(440, 300);
+            if (index >= workout.length - 1) {
+              setPhase("done");
+              return 0;
+            }
+            setPhase("rest");
+            return current?.rest ?? 15;
+          }
+          if (phase === "rest") {
+            beep(1200, 200);
+            setIndex((i) => i + 1);
+            setPhase("exercise");
+            return workout[index + 1]?.duration ?? 30;
+          }
         }
-      }
+        if (s <= 4 && s > 1 && (phase === "exercise" || phase === "rest")) beep(660, 80);
+        return s - 1;
+      });
+    }, 1000);
 
-      if (user) {
-        if (planId) await supabase.from("fitness_plans").delete().eq("id", planId);
-        const { data } = await supabase.from("fitness_plans").insert({ user_id: user.id, plan_type: planType, content: result }).select().single();
-        if (data) setPlanId(data.id);
-        toast.success("Fitness plan saved!");
-      } else {
-        localStorage.setItem("biofit-fitness-plan", result);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, paused, index]);
+
+  const startWorkout = (m: MuscleGroup) => {
+    const w = buildWorkout(m);
+    setMuscle(m);
+    setWorkout(w);
+    setIndex(0);
+    setPhase("ready");
+    setSecondsLeft(5);
+    setPaused(false);
+    toast.success(`${MUSCLE_GROUPS.find((g) => g.id === m)?.label} workout loaded!`);
+  };
+
+  const skip = () => {
+    if (phase === "exercise") {
+      if (index >= workout.length - 1) {
+        setPhase("done");
+        return;
       }
-    } catch (e) {
-      setPlan("Error generating plan. Please try again.");
-    } finally {
-      setLoading(false);
+      setPhase("rest");
+      setSecondsLeft(current?.rest ?? 15);
+    } else if (phase === "rest") {
+      setIndex((i) => i + 1);
+      setPhase("exercise");
+      setSecondsLeft(workout[index + 1]?.duration ?? 30);
+    } else if (phase === "ready") {
+      setPhase("exercise");
+      setSecondsLeft(current?.duration ?? 30);
     }
   };
 
-  const deletePlan = async () => {
-    setPlan("");
-    setPlanId(null);
-    localStorage.removeItem("biofit-fitness-plan");
-    if (user && planId) {
-      await supabase.from("fitness_plans").delete().eq("id", planId);
-      toast.success("Plan deleted");
-    }
+  const reset = () => {
+    setPhase("select");
+    setMuscle(null);
+    setIndex(0);
+    setWorkout([]);
+    setPaused(false);
   };
 
-  const toggleWeek = (i: number) => {
-    setExpandedWeeks(prev => ({ ...prev, [i]: !prev[i] }));
-  };
+  const totalDuration = workout.reduce((sum, e) => sum + e.duration + e.rest, 0);
+  const elapsed =
+    workout.slice(0, index).reduce((sum, e) => sum + e.duration + e.rest, 0) +
+    (current
+      ? phase === "exercise"
+        ? current.duration - secondsLeft
+        : phase === "rest"
+        ? current.duration + (current.rest - secondsLeft)
+        : 0
+      : 0);
+  const overallProgress = totalDuration > 0 ? (elapsed / totalDuration) * 100 : 0;
 
-  // Split plan into sections by ## headers (weeks)
-  const renderStructuredPlan = () => {
-    if (!plan) return null;
-
-    const sections = plan.split(/(?=^## )/m);
-    const intro = sections[0]; // Content before first ## (title + overview)
-    const weekSections = sections.slice(1);
-
+  // ─── Selection screen ───
+  if (phase === "select") {
     return (
-      <div className="space-y-4">
-        {/* Plan Title & Overview */}
-        {intro && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="prose prose-sm prose-invert max-w-none mb-6 [&>h1]:text-2xl [&>h1]:font-display [&>h1]:text-primary [&>h1]:mb-3 [&>p]:text-muted-foreground">
-              <ReactMarkdown>{intro}</ReactMarkdown>
-            </div>
-          </motion.div>
-        )}
+      <div className="max-w-3xl mx-auto space-y-6 pb-10">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="font-display text-3xl md:text-4xl font-extrabold mb-2 flex items-center gap-3 uppercase tracking-tight">
+            <Dumbbell className="w-8 h-8 text-primary" /> Hit Your Focus Areas
+          </h1>
+          <p className="text-muted-foreground">Pick a muscle group and start a guided workout with a built-in timer.</p>
+        </motion.div>
 
-        {/* Week Cards */}
-        {weekSections.map((section, i) => {
-          const titleMatch = section.match(/^## (.+)/m);
-          const title = titleMatch ? titleMatch[1] : `Section ${i + 1}`;
-          const content = section.replace(/^## .+\n/, "");
-          const isWeek = title.toLowerCase().includes("week");
-          const isTips = title.toLowerCase().includes("tip") || title.toLowerCase().includes("note");
-          const isExpanded = expandedWeeks[i] ?? false;
-
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
+          {MUSCLE_GROUPS.map((g, i) => (
+            <motion.button
+              key={g.id}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => startWorkout(g.id)}
+              className={`relative aspect-square rounded-2xl bg-gradient-to-br ${g.gradient} p-5 text-left overflow-hidden group shadow-xl`}
             >
-              <Card className="overflow-hidden">
-                <CardHeader
-                  className="cursor-pointer hover:bg-secondary/50 transition-colors py-4"
-                  onClick={() => toggleWeek(i)}
-                >
-                  <CardTitle className="flex items-center justify-between text-base">
-                    <span className="flex items-center gap-2">
-                      {isTips ? (
-                        <Lightbulb className="w-5 h-5 text-accent-foreground" />
-                      ) : isWeek ? (
-                        <Calendar className="w-5 h-5 text-primary" />
-                      ) : (
-                        <Target className="w-5 h-5 text-primary" />
-                      )}
-                      {title}
-                    </span>
-                    {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                {isExpanded && (
-                  <CardContent className="pt-0 pb-5">
-                    <div className="prose prose-sm prose-invert max-w-none
-                      [&>h3]:text-primary [&>h3]:font-display [&>h3]:text-base [&>h3]:mt-5 [&>h3]:mb-2 [&>h3]:pb-2 [&>h3]:border-b [&>h3]:border-border/50
-                      [&>h4]:text-foreground [&>h4]:font-semibold [&>h4]:text-sm [&>h4]:mt-4 [&>h4]:mb-1
-                      [&>p]:text-muted-foreground [&>p]:text-sm [&>p]:leading-relaxed
-                      [&>ul]:text-muted-foreground [&>ul]:text-sm [&>ul]:space-y-1
-                      [&_strong]:text-foreground
-                      [&>hr]:border-border/30 [&>hr]:my-4
-                    ">
-                      <ReactMarkdown>{content}</ReactMarkdown>
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            </motion.div>
-          );
-        })}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+              <div className="absolute -bottom-4 -right-4 text-8xl md:text-9xl opacity-30 group-hover:opacity-50 group-hover:scale-110 transition-all duration-500">
+                {g.emoji}
+              </div>
+              <div className="relative z-10 flex flex-col h-full justify-end">
+                <p className="font-display text-xl md:text-2xl font-extrabold text-white uppercase tracking-tight drop-shadow-lg">
+                  {g.label}
+                </p>
+                <p className="text-white/80 text-xs mt-1">Tap to start</p>
+              </div>
+            </motion.button>
+          ))}
+        </div>
       </div>
     );
-  };
+  }
+
+  // ─── Done screen ───
+  if (phase === "done") {
+    return (
+      <div className="max-w-md mx-auto text-center py-10 space-y-6">
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+          <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl shadow-primary/30">
+            <Trophy className="w-12 h-12 text-primary-foreground" />
+          </div>
+        </motion.div>
+        <h2 className="font-display text-3xl font-extrabold uppercase">Workout Complete! 🔥</h2>
+        <p className="text-muted-foreground">
+          You crushed {workout.length} exercises. Recovery time — hydrate and stretch.
+        </p>
+        <div className="flex gap-2 justify-center">
+          <Button onClick={reset} size="lg" className="rounded-2xl">
+            <RotateCcw className="w-4 h-4 mr-2" /> New Workout
+          </Button>
+          <Button onClick={() => muscle && startWorkout(muscle)} variant="outline" size="lg" className="rounded-2xl">
+            Repeat
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Active workout ───
+  if (!current) return null;
+
+  const isResting = phase === "rest";
+  const isReady = phase === "ready";
+  const phaseDuration = isReady ? 5 : isResting ? current.rest : current.duration;
+  const phaseProgress = ((phaseDuration - secondsLeft) / phaseDuration) * 100;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-display text-3xl font-bold mb-2 flex items-center gap-3">
-          <Dumbbell className="w-8 h-8 text-primary" /> Fitness Plan
-        </h1>
-        <p className="text-muted-foreground">Get a personalized monthly workout plan with step-by-step exercise guides.</p>
-      </motion.div>
+    <div className="max-w-2xl mx-auto pb-10">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <Button variant="ghost" size="sm" onClick={reset} className="gap-2">
+          <ArrowLeft className="w-4 h-4" /> Exit
+        </Button>
+        <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          {MUSCLE_GROUPS.find((g) => g.id === muscle)?.label} • {index + 1}/{workout.length}
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => setMuted((m) => !m)} aria-label="Toggle sound">
+          {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        </Button>
+      </div>
 
-      <Card>
-        <CardContent className="pt-6 space-y-4">
-          <label className="text-sm font-medium text-muted-foreground">Choose Your Plan Type</label>
-          <Select value={planType} onValueChange={setPlanType}>
-            <SelectTrigger className="bg-secondary border-border"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {planTypes.map(p => (
-                <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+      <Progress value={overallProgress} className="h-1.5 mb-6" />
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${index}-${phase}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="overflow-hidden border-2 border-primary/20">
+            <CardContent className="p-0">
+              {/* Phase banner */}
+              <div className={`px-5 py-2 text-center text-xs font-bold uppercase tracking-widest ${
+                isReady ? "bg-amber-500/15 text-amber-500" :
+                isResting ? "bg-blue-500/15 text-blue-500" :
+                "bg-primary/15 text-primary"
+              }`}>
+                {isReady ? "Get Ready" : isResting ? "Rest" : "Go!"}
+              </div>
+
+              {/* Exercise illustration */}
+              <div className="bg-gradient-to-br from-secondary/50 to-background aspect-square max-h-[320px] flex items-center justify-center relative overflow-hidden">
+                {!isResting && current.gifUrl ? (
+                  <img
+                    src={current.gifUrl}
+                    alt={current.name}
+                    className="w-full h-full object-contain p-4"
+                    onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+                  />
+                ) : null}
+                <motion.div
+                  animate={isResting ? { scale: [1, 1.1, 1] } : { rotate: [0, -5, 5, 0] }}
+                  transition={{ duration: isResting ? 2 : 1.5, repeat: Infinity }}
+                  className="absolute text-9xl"
+                  style={{ display: !isResting && current.gifUrl ? "none" : "block" }}
+                >
+                  {isResting ? "💧" : current.emoji}
+                </motion.div>
+              </div>
+
+              {/* Timer + name */}
+              <div className="p-6 text-center space-y-3">
+                <p className="font-display text-5xl font-extrabold tabular-nums tracking-tight">
+                  {String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:{String(secondsLeft % 60).padStart(2, "0")}
+                </p>
+                <h2 className="font-display text-xl font-bold uppercase tracking-tight">
+                  {isResting ? "Rest" : isReady ? `Up Next: ${current.name}` : current.name}
+                </h2>
+                <Progress value={phaseProgress} className="h-2" />
+              </div>
+
+              {/* Controls */}
+              <div className="flex gap-2 px-6 pb-6">
+                <Button
+                  onClick={() => setPaused((p) => !p)}
+                  size="lg"
+                  className="flex-1 rounded-2xl gap-2 h-13"
+                >
+                  {paused ? <><Play className="w-5 h-5" /> Resume</> : <><Pause className="w-5 h-5" /> Pause</>}
+                </Button>
+                <Button onClick={skip} variant="outline" size="lg" className="rounded-2xl gap-2 h-13">
+                  <SkipForward className="w-5 h-5" /> Skip
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Instructions */}
+      {!isResting && !isReady && (
+        <Card className="mt-4">
+          <CardContent className="p-5">
+            <p className="font-display font-bold text-sm uppercase tracking-widest text-muted-foreground mb-3">
+              How to do it
+            </p>
+            <ol className="space-y-2">
+              {current.instructions.map((step, i) => (
+                <li key={i} className="flex gap-3 text-sm">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-primary/15 text-primary font-bold text-xs flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                  <span className="text-foreground/90 leading-relaxed">{step}</span>
+                </li>
               ))}
-            </SelectContent>
-          </Select>
-          <div className="flex gap-2">
-            <Button onClick={generatePlan} disabled={loading} className="flex-1">
-              {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Dumbbell className="w-4 h-4 mr-2" />}
-              {plan ? "Regenerate Plan" : "Generate Plan"}
-            </Button>
-            {plan && (
-              <>
-                <Button variant="outline" onClick={generatePlan} disabled={loading} size="icon"><RefreshCw className="w-4 h-4" /></Button>
-                <Button variant="outline" onClick={deletePlan} size="icon" className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {plan && renderStructuredPlan()}
-
-      {!plan && !loading && (
-        <Card className="p-12 text-center">
-          <Dumbbell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Choose a plan type and generate your personalized fitness plan!</p>
-          {!user && <p className="text-xs text-muted-foreground mt-2">Sign in to save your plans!</p>}
+            </ol>
+          </CardContent>
         </Card>
       )}
+
+      {/* Next exercise preview (carousel-style row) */}
+      <div className="mt-4">
+        <p className="font-display font-bold text-xs uppercase tracking-widest text-muted-foreground mb-3 px-1">
+          Up Next
+        </p>
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x">
+          {workout.slice(index + 1, index + 5).map((ex) => (
+            <div
+              key={ex.id}
+              className="shrink-0 w-32 bg-card rounded-2xl border border-border p-3 snap-start"
+            >
+              <div className="aspect-square bg-secondary/50 rounded-xl flex items-center justify-center text-4xl mb-2">
+                {ex.emoji}
+              </div>
+              <p className="text-xs font-bold leading-tight line-clamp-2">{ex.name}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{ex.duration}s</p>
+            </div>
+          ))}
+          {workout.slice(index + 1).length === 0 && (
+            <div className="shrink-0 w-full text-center py-4 text-muted-foreground text-sm flex items-center justify-center gap-2">
+              <Check className="w-4 h-4 text-primary" /> Last exercise!
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
