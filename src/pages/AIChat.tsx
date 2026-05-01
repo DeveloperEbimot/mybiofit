@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Send, Mic, MicOff, Loader2, Trash2 } from "lucide-react";
+import { MessageCircle, Send, Mic, MicOff, Loader2, Trash2, Phone, PhoneOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAIChat } from "@/hooks/useAIChat";
@@ -8,6 +8,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useGroceryList } from "@/hooks/useGroceryList";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+import VoiceCallMode from "@/components/VoiceCallMode";
 
 export default function AIChat() {
   const { profile } = useUserProfile();
@@ -17,6 +18,7 @@ export default function AIChat() {
   );
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [callMode, setCallMode] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
@@ -75,17 +77,34 @@ export default function AIChat() {
   };
 
   return (
+    <>
+    {callMode && (
+      <VoiceCallMode
+        systemPrompt={`You are BioFit AI in voice conversation mode. The user's profile: Diet goal: ${profile.dietGoal}, Age: ${profile.age}, Weight: ${profile.weight}kg, Height: ${profile.height}cm. Keep responses SHORT and conversational (1-3 sentences max), like a real spoken chat. Be warm, motivating, and natural. Do not use markdown, lists, or formatting — only plain spoken language.`}
+        onClose={() => setCallMode(false)}
+      />
+    )}
     <div className="max-w-2xl mx-auto flex flex-col" style={{ height: "calc(100vh - 10rem)" }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold">AI Chat</h1>
           <p className="text-muted-foreground text-sm">Ask me anything about health, nutrition, and fitness!</p>
         </div>
-        {messages.length > 0 && (
-          <Button variant="ghost" size="icon" onClick={clearMessages} className="text-muted-foreground">
-            <Trash2 className="w-4 h-4" />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setCallMode(true)}
+            className="gap-2 rounded-2xl shadow-lg shadow-primary/25"
+          >
+            <Phone className="w-4 h-4" /> Voice Call
           </Button>
-        )}
+          {messages.length > 0 && (
+            <Button variant="ghost" size="icon" onClick={clearMessages} className="text-muted-foreground">
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </motion.div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
@@ -160,5 +179,6 @@ export default function AIChat() {
         </Button>
       </div>
     </div>
+    </>
   );
 }
