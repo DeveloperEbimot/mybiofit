@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, Send, Mic, MicOff, Loader2, Trash2, Phone, PhoneOff } from "lucide-react";
+import { MessageCircle, Send, Mic, MicOff, Loader2, Trash2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAIChat } from "@/hooks/useAIChat";
