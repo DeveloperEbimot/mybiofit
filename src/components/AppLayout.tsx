@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, BarChart3, LogIn, LogOut, Menu, X, Sun, Moon, Globe } from "lucide-react";
+import { Home, Camera, UtensilsCrossed, ShoppingCart, Dumbbell, MessageCircle, Calculator, BarChart3, LogIn, LogOut, Menu, X, Sun, Moon, Globe, Settings as SettingsIcon, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [avatar, setAvatar] = useState<string>("");
+  const [profileName, setProfileName] = useState<string>("");
 
   const navItems = [
     { to: "/", icon: Home, label: t("nav.home") },
@@ -49,7 +51,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     supabase
       .from("profiles")
-      .select("age, weight, height, language")
+      .select("age, weight, height, language, name, avatar")
       .eq("user_id", user.id)
       .single()
       .then(({ data }) => {
@@ -58,6 +60,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           i18n.changeLanguage(data.language);
           localStorage.setItem("biofit-language", data.language);
         }
+        if (data?.avatar) setAvatar(data.avatar);
+        if (data?.name) setProfileName(data.name);
         if (data && data.age === 25 && Number(data.weight) === 70 && Number(data.height) === 170) {
           const created = new Date(user.created_at).getTime();
           if (Date.now() - created < 5 * 60 * 1000) {
@@ -76,7 +80,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   const currentLang = languages.find((l) => l.code === i18n.language);
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "U";
+  const displayName = profileName || (user?.user_metadata?.full_name as string) || user?.email?.split("@")[0] || "U";
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300" dir={i18n.language === "ar" ? "rtl" : "ltr"}>
@@ -157,7 +161,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <Button variant="ghost" size="icon" className="rounded-xl">
                       <Avatar className="w-8 h-8">
                         <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold">
-                          {displayName.charAt(0).toUpperCase()}
+                          {avatar || displayName.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -167,6 +171,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       {user.email}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/settings")}>
+                      <SettingsIcon className="w-4 h-4 mr-2" /> Settings
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/language")}>
                       <Globe className="w-4 h-4 mr-2" /> {t("language.change")}
                     </DropdownMenuItem>
