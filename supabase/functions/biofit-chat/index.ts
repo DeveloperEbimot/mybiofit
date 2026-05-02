@@ -19,66 +19,118 @@ You support these diet goals: weight loss, muscle gain, maintenance, keto, vegan
 
 Always format your responses clearly with markdown when appropriate.`;
 
+const GEMINI_MODEL = "gemini-2.0-flash";
+
+// Convert OpenAI-style messages to Gemini "contents" format
+function toGeminiContents(messages: any[], image?: string) {
+  const contents: any[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    const m = messages[i];
+    const role = m.role === "assistant" ? "model" : "user";
+    const isLast = i === messages.length - 1;
+    const parts: any[] = [];
+    if (isLast && image && m.role === "user") {
+      // Extract base64 from data URL if present
+      const match = /^data:(.+);base64,(.+)$/.exec(image);
+      if (match) {
+        parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
+      }
+      parts.push({ text: m.content || "Analyze this meal" });
+    } else {
+      parts.push({ text: typeof m.content === "string" ? m.content : JSON.stringify(m.content) });
+    }
+    contents.push({ role, parts });
+  }
+  return contents;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { messages, systemPrompt, extraContext, image } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
     const system = systemPrompt || DEFAULT_SYSTEM;
     const contextAddition = extraContext ? `\n\nAdditional context: ${extraContext}` : "";
 
-    const apiMessages: any[] = [
-      { role: "system", content: system + contextAddition },
-    ];
+    const contents = toGeminiContents(messages || [], image);
 
-    // Handle image analysis
-    if (image) {
-      apiMessages.push({
-        role: "user",
-        content: [
-          { type: "image_url", image_url: { url: image } },
-          { type: "text", text: messages[messages.length - 1]?.content || "Analyze this meal" },
-        ],
-      });
-    } else {
-      apiMessages.push(...messages);
-    }
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const geminiResp = await fetch(url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: apiMessages,
-        stream: true,
+        systemInstruction: { parts: [{ text: system + contextAddition }] },
+        contents,
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
       }),
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited. Please try again shortly." }), {
+    if (!geminiResp.ok || !geminiResp.body) {
+      const t = await geminiResp.text();
+      console.error("Gemini error:", geminiResp.status, t);
+      if (geminiResp.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limited by Gemini. Please try again shortly." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Usage limit reached. Please add credits." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI service error" }), {
+      return new Response(JSON.stringify({ error: "AI service error", details: t.slice(0, 300) }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(response.body, {
+    // Re-stream Gemini SSE as OpenAI-compatible SSE chunks the frontend already parses.
+    const reader = geminiResp.body.getReader();
+    const decoder = new TextDecoder();
+    const encoder = new TextEncoder();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        let buffer = "";
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            let idx;
+            while ((idx = buffer.indexOf("\n")) !== -1) {
+              let line = buffer.slice(0, idx);
+              buffer = buffer.slice(idx + 1);
+              if (line.endsWith("\r")) line = line.slice(0, -1);
+              if (!line.startsWith("data: ")) continue;
+              const json = line.slice(6).trim();
+              if (!json) continue;
+              try {
+                const parsed = JSON.parse(json);
+                const text = parsed?.candidates?.[0]?.content?.parts
+                  ?.map((p: any) => p.text || "")
+                  .join("") || "";
+                if (text) {
+                  const chunk = {
+                    choices: [{ delta: { content: text } }],
+                  };
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
+                }
+              } catch {
+                // partial; put back and wait
+                buffer = line + "\n" + buffer;
+                break;
+              }
+            }
+          }
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        } catch (e) {
+          console.error("stream error:", e);
+          controller.error(e);
+        }
+      },
+    });
+
+    return new Response(stream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
