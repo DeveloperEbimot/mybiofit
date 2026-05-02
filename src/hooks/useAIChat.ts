@@ -14,7 +14,7 @@ export function useAIChat(systemPrompt?: string) {
     setIsLoading(true);
 
     let assistantSoFar = "";
-    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat`;
+    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`;
 
     try {
       const resp = await fetch(CHAT_URL, {
