@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import RatingPopup from "@/components/RatingPopup";
 import AdSense from "@/components/AdSense";
@@ -48,6 +49,42 @@ export default function Index() {
     { icon: Calculator, label: t("features.bmi_calculator"), desc: t("features.bmi_desc"), to: "/bmi", gradient: "from-rose-500 to-pink-500" },
     { icon: MessageCircle, label: t("features.ai_coach"), desc: t("features.ai_coach_desc"), to: "/chat", gradient: "from-primary to-accent" },
   ];
+
+  // ─── Focused Week Strip (Mon-Sun for the current week) ───
+  const today = new Date();
+  const weekDays = (() => {
+    const monday = new Date(today);
+    const day = (today.getDay() + 6) % 7; // 0=Mon
+    monday.setDate(today.getDate() - day);
+    const labels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+    return labels.map((label, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return { label, date: d.getDate(), full: d, isToday: d.toDateString() === today.toDateString() };
+    });
+  })();
+  const [activeDay, setActiveDay] = useState(today.toDateString());
+
+  // ─── Categories (visual filter — no logic change to feature grid) ───
+  const categories = [
+    { id: "all", label: "All Type" },
+    { id: "nutrition", label: "Nutrition" },
+    { id: "training", label: "Training" },
+    { id: "tracking", label: "Tracking" },
+    { id: "ai", label: "AI" },
+  ];
+  const featureCategory: Record<string, string> = {
+    "/scan": "nutrition",
+    "/recipes": "nutrition",
+    "/grocery": "nutrition",
+    "/fitness": "training",
+    "/bmi": "tracking",
+    "/chat": "ai",
+  };
+  const [activeCat, setActiveCat] = useState("all");
+  const filteredFeatures = activeCat === "all"
+    ? features
+    : features.filter((f) => featureCategory[f.to] === activeCat);
 
   return (
     <div className="space-y-10 md:space-y-8 pb-10 md:pb-8">
@@ -137,6 +174,36 @@ export default function Index() {
         </div>
       </section>
 
+      {/* ─── Focused Week Strip (logged-in only) ─── */}
+      {user && (
+        <section className="animate-fade-up" style={{ animationDelay: "0.08s" }}>
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 snap-x scrollbar-none">
+            {weekDays.map((d) => {
+              const active = d.full.toDateString() === activeDay;
+              return (
+                <button
+                  key={d.label}
+                  onClick={() => setActiveDay(d.full.toDateString())}
+                  className={`shrink-0 snap-start flex flex-col items-center justify-center w-14 h-20 rounded-full border transition-all ${
+                    active
+                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/30"
+                      : "border-border text-foreground/70 hover:border-primary/40"
+                  }`}
+                >
+                  <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${active ? "opacity-90" : "text-muted-foreground"}`}>
+                    {d.label}
+                  </span>
+                  <span className="font-display text-lg font-extrabold leading-none">{d.date}</span>
+                  {d.isToday && !active && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* ─── Diet Goal Selector ─── */}
       <Suspense fallback={<div className="ios-card p-6 max-w-sm mx-auto h-24 animate-pulse" />}>
         <DietGoalSelector value={profile.dietGoal} onChange={(v) => updateProfile({ dietGoal: v })} />
@@ -151,15 +218,35 @@ export default function Index() {
 
       {/* ─── Feature Grid ─── */}
       <section>
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="h-px flex-1 max-w-16 bg-gradient-to-r from-transparent to-border" />
-          <h2 className="font-display text-2xl font-extrabold text-foreground text-center tracking-tight uppercase">
+        <div className="flex items-baseline justify-between mb-4 px-1">
+          <h2 className="font-display text-xl md:text-2xl font-extrabold text-foreground tracking-tight">
             {user ? t("home.your_dashboard") : t("home.your_toolkit")}
           </h2>
-          <div className="h-px flex-1 max-w-16 bg-gradient-to-l from-transparent to-border" />
+          <span className="text-xs text-muted-foreground font-medium">{filteredFeatures.length} items</span>
         </div>
+
+        {/* Category pills */}
+        <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 snap-x scrollbar-none mb-2">
+          {categories.map((c) => {
+            const active = activeCat === c.id;
+            return (
+              <button
+                key={c.id}
+                onClick={() => setActiveCat(c.id)}
+                className={`shrink-0 snap-start px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+                  active
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                    : "bg-secondary text-foreground/80 hover:bg-secondary/70"
+                }`}
+              >
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {features.map((f, i) => (
+          {filteredFeatures.map((f, i) => (
             <div key={f.to} className="animate-fade-up" style={{ animationDelay: `${0.06 * i}s` }}>
               <Link to={f.to} className="ios-card p-5 block group h-full relative overflow-hidden">
                 <div className={`absolute top-0 right-0 w-1 h-full bg-gradient-to-b ${f.gradient} opacity-40 group-hover:opacity-100 transition-opacity`} />
