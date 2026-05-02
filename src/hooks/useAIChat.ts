@@ -30,7 +30,22 @@ export function useAIChat(systemPrompt?: string) {
         }),
       });
 
-      if (!resp.ok || !resp.body) throw new Error("Failed to start stream");
+      if (!resp.ok || !resp.body) {
+        let friendly = "Sorry, I encountered an error. Please try again.";
+        try {
+          const data = await resp.json();
+          if (resp.status === 402) {
+            friendly = "⚠️ The AI service has run out of credits for this month. Please contact support at biofit096@gmail.com so we can top it up.";
+          } else if (resp.status === 429) {
+            friendly = "⏳ Too many requests right now. Please wait a few seconds and try again.";
+          } else if (data?.error) {
+            friendly = data.error;
+          }
+        } catch {}
+        setMessages(prev => [...prev, { role: "assistant", content: friendly }]);
+        setIsLoading(false);
+        return;
+      }
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();

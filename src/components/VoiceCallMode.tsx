@@ -158,7 +158,23 @@ export default function VoiceCallMode({ systemPrompt, onClose }: Props) {
         }),
       });
 
-      if (!resp.ok || !resp.body) throw new Error("Chat failed");
+      if (!resp.ok || !resp.body) {
+        let friendly = "Sorry, I had trouble responding. Could you try again?";
+        try {
+          const data = await resp.json();
+          if (resp.status === 402) {
+            friendly = "The A.I. service has run out of credits this month. Please contact support to top it up.";
+          } else if (resp.status === 429) {
+            friendly = "Too many requests right now. Please wait a few seconds.";
+          } else if (data?.error) {
+            friendly = data.error;
+          }
+        } catch {}
+        setLastReply(friendly);
+        setHistory((h) => [...h, { role: "assistant", content: friendly }]);
+        speakAndListen(friendly);
+        return;
+      }
 
       // Read full stream then speak
       const reader = resp.body.getReader();
