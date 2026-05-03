@@ -28,7 +28,7 @@ export default function GroceryList() {
     const itemNames = items.map(i => i.name).join(", ");
 
     try {
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat`, {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +39,14 @@ export default function GroceryList() {
         }),
       });
 
-      if (!resp.ok || !resp.body) throw new Error("Failed");
+      if (!resp.ok || !resp.body) {
+        let message = "Failed to get suggestions.";
+        try {
+          const data = await resp.json();
+          if (data?.error) message = data.error;
+        } catch {}
+        throw new Error(message);
+      }
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "", result = "";
@@ -63,7 +70,7 @@ export default function GroceryList() {
         }
       }
     } catch (e) {
-      setAiSuggestion("Error getting suggestions. Please try again.");
+      setAiSuggestion(e instanceof Error ? e.message : "Error getting suggestions. Please try again.");
     } finally {
       setLoading(false);
     }
