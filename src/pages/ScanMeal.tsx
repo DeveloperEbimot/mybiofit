@@ -101,7 +101,7 @@ export default function ScanMeal() {
     setLogged(false);
 
     try {
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat`, {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,7 +121,14 @@ Tell me: 1) What foods you see 2) Estimated calories and macros (protein, carbs,
         }),
       });
 
-      if (!resp.ok || !resp.body) throw new Error("Failed");
+      if (!resp.ok || !resp.body) {
+        let message = "Failed to analyze meal.";
+        try {
+          const data = await resp.json();
+          if (data?.error) message = data.error;
+        } catch {}
+        throw new Error(message);
+      }
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -152,7 +159,7 @@ Tell me: 1) What foods you see 2) Estimated calories and macros (protein, carbs,
       if (parsed) setNutrition(parsed);
     } catch (e) {
       console.error(e);
-      setAnalysis("Error analyzing meal. Please try again.");
+      setAnalysis(e instanceof Error ? e.message : "Error analyzing meal. Please try again.");
     } finally {
       setLoading(false);
     }
