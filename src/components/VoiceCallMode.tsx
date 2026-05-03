@@ -146,7 +146,7 @@ export default function VoiceCallMode({ systemPrompt, onClose }: Props) {
     setHistory(newHistory);
 
     try {
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat`, {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
