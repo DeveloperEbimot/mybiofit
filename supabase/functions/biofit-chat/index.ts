@@ -19,29 +19,33 @@ You support these diet goals: weight loss, muscle gain, maintenance, keto, vegan
 
 Always format your responses clearly with markdown when appropriate.`;
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GROQ_TEXT_MODEL = "llama-3.3-70b-versatile";
+const GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-// Convert OpenAI-style messages to Gemini "contents" format
-function toGeminiContents(messages: any[], image?: string) {
-  const contents: any[] = [];
-  for (let i = 0; i < messages.length; i++) {
-    const m = messages[i];
-    const role = m.role === "assistant" ? "model" : "user";
-    const isLast = i === messages.length - 1;
-    const parts: any[] = [];
-    if (isLast && image && m.role === "user") {
-      // Extract base64 from data URL if present
-      const match = /^data:(.+);base64,(.+)$/.exec(image);
-      if (match) {
-        parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
-      }
-      parts.push({ text: m.content || "Analyze this meal" });
-    } else {
-      parts.push({ text: typeof m.content === "string" ? m.content : JSON.stringify(m.content) });
+function toGroqContent(content: unknown) {
+  return typeof content === "string" ? content : JSON.stringify(content);
+}
+
+function toGroqMessages(messages: any[], image?: string) {
+  return (messages || []).map((msg, index, all) => {
+    const isLastUserMessage = index === all.length - 1 && msg.role === "user";
+
+    if (isLastUserMessage && image) {
+      return {
+        role: msg.role,
+        content: [
+          { type: "text", text: toGroqContent(msg.content) },
+          { type: "image_url", image_url: { url: image } },
+        ],
+      };
     }
-    contents.push({ role, parts });
-  }
-  return contents;
+
+    return {
+      role: msg.role,
+      content: toGroqContent(msg.content),
+    };
+  });
 }
 
 serve(async (req) => {
@@ -49,41 +53,75 @@ serve(async (req) => {
 
   try {
     const { messages, systemPrompt, extraContext, image } = await req.json();
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
+    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+
+    if (!GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY is not configured");
+    }
 
     const system = systemPrompt || DEFAULT_SYSTEM;
     const contextAddition = extraContext ? `\n\nAdditional context: ${extraContext}` : "";
 
-    const contents = toGeminiContents(messages || [], image);
+    const groqMessages = [
+      {
+        role: "system",
+        content: system + contextAddition,
+      },
+      ...toGroqMessages(messages || [], image),
+    ];
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
-
-    const geminiResp = await fetch(url, {
+    const groqResp = await fetch(GROQ_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system + contextAddition }] },
-        contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+        model: image ? GROQ_VISION_MODEL : GROQ_TEXT_MODEL,
+        messages: groqMessages,
+        temperature: 0.7,
+        max_tokens: 2048,
+        stream: true,
       }),
     });
 
-    if (!geminiResp.ok || !geminiResp.body) {
-      const t = await geminiResp.text();
-      console.error("Gemini error:", geminiResp.status, t);
-      if (geminiResp.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited by Gemini. Please try again shortly." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+    if (!groqResp.ok || !groqResp.body) {
+      const errorText = await groqResp.text();
+      console.error("Groq error:", groqResp.status, errorText);
+
+      if (groqResp.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limited by Groq. Please try again shortly." }),
+          {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       }
-      return new Response(JSON.stringify({ error: "AI service error", details: t.slice(0, 300) }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+      if (groqResp.status === 401) {
+        return new Response(
+          JSON.stringify({ error: "GROQ_API_KEY is invalid or expired" }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          error: "AI service error",
+          details: errorText.slice(0, 300),
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
-    // Re-stream Gemini SSE as OpenAI-compatible SSE chunks the frontend already parses.
-    const reader = geminiResp.body.getReader();
+    const reader = groqResp.body.getReader();
     const decoder = new TextDecoder();
     const encoder = new TextEncoder();
 
@@ -94,37 +132,40 @@ serve(async (req) => {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
+
             buffer += decoder.decode(value, { stream: true });
             let idx;
+
             while ((idx = buffer.indexOf("\n")) !== -1) {
               let line = buffer.slice(0, idx);
               buffer = buffer.slice(idx + 1);
               if (line.endsWith("\r")) line = line.slice(0, -1);
               if (!line.startsWith("data: ")) continue;
-              const json = line.slice(6).trim();
-              if (!json) continue;
+
+              const jsonStr = line.slice(6).trim();
+              if (jsonStr === "[DONE]") break;
+
               try {
-                const parsed = JSON.parse(json);
-                const text = parsed?.candidates?.[0]?.content?.parts
-                  ?.map((p: any) => p.text || "")
-                  .join("") || "";
-                if (text) {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+
+                if (content) {
                   const chunk = {
-                    choices: [{ delta: { content: text } }],
+                    choices: [{ delta: { content } }],
                   };
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
                 }
               } catch {
-                // partial; put back and wait
                 buffer = line + "\n" + buffer;
                 break;
               }
             }
           }
+
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
         } catch (e) {
-          console.error("stream error:", e);
+          console.error("Stream error:", e);
           controller.error(e);
         }
       },
@@ -134,9 +175,15 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
-    console.error("chat error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("Chat error:", e);
+    return new Response(
+      JSON.stringify({
+        error: e instanceof Error ? e.message : "Unknown error",
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });
