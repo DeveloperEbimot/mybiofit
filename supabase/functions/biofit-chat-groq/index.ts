@@ -19,8 +19,34 @@ You support these diet goals: weight loss, muscle gain, maintenance, keto, vegan
 
 Always format your responses clearly with markdown when appropriate.`;
 
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GROQ_TEXT_MODEL = "llama-3.3-70b-versatile";
+const GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+
+function toGroqContent(content: unknown) {
+  return typeof content === "string" ? content : JSON.stringify(content);
+}
+
+function toGroqMessages(messages: any[], image?: string) {
+  return (messages || []).map((msg, index, all) => {
+    const isLastUserMessage = index === all.length - 1 && msg.role === "user";
+
+    if (isLastUserMessage && image) {
+      return {
+        role: msg.role,
+        content: [
+          { type: "text", text: toGroqContent(msg.content) },
+          { type: "image_url", image_url: { url: image } },
+        ],
+      };
+    }
+
+    return {
+      role: msg.role,
+      content: toGroqContent(msg.content),
+    };
+  });
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -45,19 +71,7 @@ serve(async (req) => {
       content: system + contextAddition,
     });
 
-    // Add conversation messages
-    for (const msg of messages || []) {
-      groqMessages.push({
-        role: msg.role,
-        content: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content),
-      });
-    }
-
-    // If image is provided with last user message, add it to context
-    if (image && groqMessages.length > 0 && groqMessages[groqMessages.length - 1].role === "user") {
-      const lastMsg = groqMessages[groqMessages.length - 1];
-      lastMsg.content = `[Image provided for analysis]\n\n${lastMsg.content}`;
-    }
+    groqMessages.push(...toGroqMessages(messages || [], image));
 
     // Call Groq API with streaming
     const groqResp = await fetch(GROQ_API_URL, {
@@ -67,7 +81,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: GROQ_MODEL,
+        model: image ? GROQ_VISION_MODEL : GROQ_TEXT_MODEL,
         messages: groqMessages,
         temperature: 0.7,
         max_tokens: 2048,
