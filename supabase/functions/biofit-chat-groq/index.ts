@@ -19,7 +19,7 @@ You support these diet goals: weight loss, muscle gain, maintenance, keto, vegan
 
 Always format your responses clearly with markdown when appropriate.`;
 
-const GROQ_MODEL = "llama-3.1-70b-versatile";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 serve(async (req) => {
