@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
 import RouteChangeTracker from "@/components/RouteChangeTracker";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import AdminRoute from "@/components/AdminRoute";
 import "@/i18n";
 
 const Index = lazy(() => import("./pages/Index"));
@@ -52,8 +53,8 @@ const App = () => (
                 <Route path="/bmi" element={<BMICalculator />} />
                 <Route path="/chat" element={<AIChat />} />
                 <Route path="/stats" element={<Statistics />} />
-                <Route path="/ratings" element={<Ratings />} />
-                <Route path="/pwa-installs" element={<PWAInstalls />} />
+                <Route path="/ratings" element={<AdminRoute><Ratings /></AdminRoute>} />
+                <Route path="/pwa-installs" element={<AdminRoute><PWAInstalls /></AdminRoute>} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
