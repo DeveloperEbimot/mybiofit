@@ -6,6 +6,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAIGate } from "@/hooks/useAIGate";
 import ReactMarkdown from "react-markdown";
 import {
   Table,
@@ -48,6 +49,7 @@ export default function ScanMeal() {
   const { profile } = useUserProfile();
   const { user } = useAuth();
   const { toast } = useToast();
+  const gate = useAIGate("scan_meal");
   const [image, setImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -95,6 +97,7 @@ export default function ScanMeal() {
 
   const analyzeMeal = async () => {
     if (!image) return;
+    if (!gate.tryConsume()) return;
     setLoading(true);
     setAnalysis("");
     setNutrition(null);
@@ -102,14 +105,13 @@ export default function ScanMeal() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error("Please sign in to scan meals.");
-      }
+      const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${authToken}`,
+          ...gate.anonHeaders,
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: `Analyze this meal image. My diet goal is: ${profile.dietGoal}. 
