@@ -4,6 +4,7 @@ import { PhoneOff, Mic, MicOff, Loader2, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAIGate } from "@/hooks/useAIGate";
 
 type Status = "idle" | "listening" | "thinking" | "speaking";
 type Turn = { role: "user" | "assistant"; content: string };
@@ -15,6 +16,7 @@ interface Props {
 
 export default function VoiceCallMode({ userContext, onClose }: Props) {
   const [status, setStatus] = useState<Status>("idle");
+  const gate = useAIGate("voice_call");
   const [transcript, setTranscript] = useState("");
   const [lastReply, setLastReply] = useState("");
   const [muted, setMuted] = useState(false);
@@ -141,6 +143,10 @@ export default function VoiceCallMode({ userContext, onClose }: Props) {
   };
 
   const handleUserSaid = async (text: string) => {
+    if (!gate.tryConsume()) {
+      const msg = "You've used your free voice tries. Sign up free to keep talking.";
+      setLastReply(msg); speakAndListen(msg); return;
+    }
     setStatus("thinking");
     setTranscript(text);
     const newHistory: Turn[] = [...historyRef.current, { role: "user", content: text }];
@@ -148,15 +154,13 @@ export default function VoiceCallMode({ userContext, onClose }: Props) {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        const msg = "Please sign in to use voice chat.";
-        setLastReply(msg); speakAndListen(msg); return;
-      }
+      const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${authToken}`,
+          ...gate.anonHeaders,
         },
         body: JSON.stringify({
           messages: newHistory,
