@@ -14,15 +14,8 @@ export default function Recipes() {
   const { addMultiple } = useGroceryList();
   const [query, setQuery] = useState("");
   const { messages, isLoading, sendMessage } = useAIChat(
-    `You are BioFit's recipe chef AI. Generate recipes that fit the user's ${profile.dietGoal} diet. Always include:
-1. Recipe name
-2. Prep time and cook time
-3. Complete ingredient list with amounts
-4. Step-by-step cooking instructions (numbered)
-5. Nutritional info (calories, protein, carbs, fat per serving)
-6. Tips for the diet goal
-
-Format nicely with markdown. Be creative and practical.`
+    "recipes",
+    `Diet goal: ${profile.dietGoal}.`.slice(0, 500)
   );
 
   const handleGenerate = () => {
