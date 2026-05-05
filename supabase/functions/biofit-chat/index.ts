@@ -1,11 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const DEFAULT_SYSTEM = `You are BioFit AI, a knowledgeable health, nutrition, and fitness assistant. You provide accurate, evidence-based advice about:
+const SYSTEM_PROMPTS: Record<string, string> = {
+  general: `You are BioFit AI, a knowledgeable health, nutrition, and fitness assistant. You provide accurate, evidence-based advice about:
 - Diet analysis and meal planning
 - Nutritional information and calorie counting
 - Fitness plans and exercise guidance
@@ -17,7 +19,15 @@ You are friendly, motivating, and thorough. When discussing exercises, always in
 
 You support these diet goals: weight loss, muscle gain, maintenance, keto, vegan, vegetarian, high-protein, low-carb, Mediterranean.
 
-Always format your responses clearly with markdown when appropriate.`;
+Always format your responses clearly with markdown when appropriate.`,
+  voice: `You are BioFit AI in voice conversation mode. Keep responses SHORT and conversational (1-3 sentences max). No markdown.`,
+  recipes: `You are BioFit's recipe chef AI. Generate recipes that fit the user's diet with ingredients, steps, and macros.`,
+  scan_meal: `You are BioFit AI, a nutrition expert. Analyze food images and ALWAYS include a JSON block at the end with meal_name, calories, protein, carbs, fat, fiber values.`,
+};
+
+const MAX_MESSAGES = 20;
+const MAX_MESSAGE_CHARS = 2000;
+const MAX_CONTEXT_CHARS = 500;
 
 const GROQ_TEXT_MODEL = "llama-3.3-70b-versatile";
 const GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
@@ -52,15 +62,55 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, systemPrompt, extraContext, image } = await req.json();
+    const authHeader = req.headers.get("Authorization") || "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const token = authHeader.slice("Bearer ".length);
+    const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
+    const { data: claimsData, error: claimsErr } = await sb.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims?.sub || claimsData.claims.role === "anon") {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { messages, promptId, userContext, image } = await req.json();
+
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
+      return new Response(JSON.stringify({ error: `messages must be a non-empty array of at most ${MAX_MESSAGES} items` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    for (const m of messages) {
+      if (!m || (m.role !== "user" && m.role !== "assistant")) {
+        return new Response(JSON.stringify({ error: "invalid message role" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const c = toGroqContent(m.content);
+      if (typeof c !== "string" || c.length > MAX_MESSAGE_CHARS) {
+        return new Response(JSON.stringify({ error: `message content must be <= ${MAX_MESSAGE_CHARS} chars` }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+    if (userContext && (typeof userContext !== "string" || userContext.length > MAX_CONTEXT_CHARS)) {
+      return new Response(JSON.stringify({ error: `userContext must be a string <= ${MAX_CONTEXT_CHARS} chars` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const system = SYSTEM_PROMPTS[promptId as string] ?? SYSTEM_PROMPTS.general;
+
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
 
     if (!GROQ_API_KEY) {
       throw new Error("GROQ_API_KEY is not configured");
     }
 
-    const system = systemPrompt || DEFAULT_SYSTEM;
-    const contextAddition = extraContext ? `\n\nAdditional context: ${extraContext}` : "";
+    const contextAddition = userContext ? `\n\nUser context: ${userContext}` : "";
 
     const groqMessages = [
       {
