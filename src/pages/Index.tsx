@@ -213,6 +213,29 @@ export default function Index() {
         <DailyTasks />
       </Suspense>
 
+      {/* ─── Today's Workout shortcut (logged-in only) ─── */}
+      {user && (
+        <section className="animate-fade-up" style={{ animationDelay: "0.12s" }}>
+          <Link
+            to="/fitness"
+            className="relative block overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-accent/10 to-primary/5 p-5 group"
+          >
+            <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-primary/10 blur-2xl group-hover:bg-primary/20 transition-colors" />
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
+                <Dumbbell className="w-7 h-7 text-primary-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-0.5">Today's Workout</p>
+                <h3 className="font-display text-lg font-extrabold tracking-tight uppercase truncate">Pick your focus & go</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Guided timer • Form cues • No equipment needed</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-primary shrink-0 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+        </section>
+      )}
+
       <AdSense className="my-4" />
 
       {/* ─── Feature Grid ─── */}
