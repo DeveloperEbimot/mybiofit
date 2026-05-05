@@ -101,11 +101,15 @@ export default function ScanMeal() {
     setLogged(false);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Please sign in to scan meals.");
+      }
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: `Analyze this meal image. My diet goal is: ${profile.dietGoal}. 
@@ -117,7 +121,7 @@ IMPORTANT: At the very end of your response, include a JSON block with the estim
 
 Tell me: 1) What foods you see 2) Estimated calories and macros (protein, carbs, fat, fiber in grams) 3) Whether it fits my ${profile.dietGoal} diet 4) Suggestions to improve it. Be specific and helpful.` }],
           image,
-          systemPrompt: "You are BioFit AI, a nutrition expert. Analyze food images and provide detailed nutritional analysis. Always estimate calories and macronutrients. Be encouraging but honest. ALWAYS include a JSON block at the end with meal_name, calories, protein, carbs, fat, fiber values.",
+          promptId: "scan_meal",
         }),
       });
 

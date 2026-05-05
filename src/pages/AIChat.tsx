@@ -13,9 +13,8 @@ import VoiceCallMode from "@/components/VoiceCallMode";
 export default function AIChat() {
   const { profile } = useUserProfile();
   const { items: groceryItems } = useGroceryList();
-  const { messages, isLoading, sendMessage, clearMessages } = useAIChat(
-    `You are BioFit AI, a comprehensive health and fitness assistant. The user's profile: Diet goal: ${profile.dietGoal}, Age: ${profile.age}, Weight: ${profile.weight}kg, Height: ${profile.height}cm, Gender: ${profile.gender}, Activity: ${profile.activityLevel}. Their grocery list has: ${groceryItems.map(i => i.name).join(", ") || "nothing"}. Answer any health, nutrition, fitness, or diet question thoroughly. Use markdown formatting.`
-  );
+  const userContext = `Diet goal: ${profile.dietGoal}, Age: ${profile.age}, Weight: ${profile.weight}kg, Height: ${profile.height}cm, Gender: ${profile.gender}, Activity: ${profile.activityLevel}. Grocery list: ${groceryItems.map(i => i.name).join(", ") || "nothing"}.`.slice(0, 500);
+  const { messages, isLoading, sendMessage, clearMessages } = useAIChat("general", userContext);
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [callMode, setCallMode] = useState(false);
@@ -80,7 +79,7 @@ export default function AIChat() {
     <>
     {callMode && (
       <VoiceCallMode
-        systemPrompt={`You are BioFit AI in voice conversation mode. The user's profile: Diet goal: ${profile.dietGoal}, Age: ${profile.age}, Weight: ${profile.weight}kg, Height: ${profile.height}cm. Keep responses SHORT and conversational (1-3 sentences max), like a real spoken chat. Be warm, motivating, and natural. Do not use markdown, lists, or formatting — only plain spoken language.`}
+        userContext={`Diet goal: ${profile.dietGoal}, Age: ${profile.age}, Weight: ${profile.weight}kg, Height: ${profile.height}cm.`.slice(0, 500)}
         onClose={() => setCallMode(false)}
       />
     )}

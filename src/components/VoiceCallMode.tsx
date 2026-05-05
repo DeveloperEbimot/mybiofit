@@ -3,16 +3,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PhoneOff, Mic, MicOff, Loader2, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 type Status = "idle" | "listening" | "thinking" | "speaking";
 type Turn = { role: "user" | "assistant"; content: string };
 
 interface Props {
-  systemPrompt: string;
+  userContext?: string;
   onClose: () => void;
 }
 
-export default function VoiceCallMode({ systemPrompt, onClose }: Props) {
+export default function VoiceCallMode({ userContext, onClose }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [transcript, setTranscript] = useState("");
   const [lastReply, setLastReply] = useState("");
@@ -146,15 +147,21 @@ export default function VoiceCallMode({ systemPrompt, onClose }: Props) {
     setHistory(newHistory);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        const msg = "Please sign in to use voice chat.";
+        setLastReply(msg); speakAndListen(msg); return;
+      }
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           messages: newHistory,
-          systemPrompt,
+          promptId: "voice",
+          userContext,
         }),
       });
 
