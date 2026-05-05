@@ -7,11 +7,13 @@ import { useGroceryList } from "@/hooks/useGroceryList";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAIGate } from "@/hooks/useAIGate";
 import ReactMarkdown from "react-markdown";
 
 export default function GroceryList() {
   const { items, addItem, toggleItem, removeItem, clearChecked, addMultiple } = useGroceryList();
   const { profile } = useUserProfile();
+  const gate = useAIGate("grocery_ai");
   const [newItem, setNewItem] = useState("");
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,20 +26,20 @@ export default function GroceryList() {
   };
 
   const analyzeGroceryGaps = async () => {
+    if (!gate.tryConsume()) return;
     setLoading(true);
     setAiSuggestion("");
     const itemNames = items.map(i => i.name).join(", ");
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error("Please sign in to use AI suggestions.");
-      }
+      const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/biofit-chat-groq`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${authToken}`,
+          ...gate.anonHeaders,
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: `My current grocery list has: ${itemNames || "nothing yet"}. My diet goal is ${profile.dietGoal}. What essential items am I missing for a balanced ${profile.dietGoal} diet? Suggest specific items I should add. Also suggest a quick meal I could make with what I have.` }],

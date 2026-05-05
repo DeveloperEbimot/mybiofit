@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-biofit-anon-id, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Server-side prompt allowlist. Clients pick a promptId; they cannot supply prompt text.
@@ -35,6 +35,10 @@ const GROQ_TEXT_MODEL = "llama-3.3-70b-versatile";
 const GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
+// Cloudflare Workers AI fallback (OpenAI-compatible chat completions)
+const CF_TEXT_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+const CF_VISION_MODEL = "@cf/meta/llama-3.2-11b-vision-instruct";
+
 function toGroqContent(content: unknown) {
   return typeof content === "string" ? content : JSON.stringify(content);
 }
@@ -64,10 +68,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // --- Auth: require a real signed-in user (reject anon-key-only callers) ---
+    // --- Auth: allow signed-in users OR anonymous callers (client enforces 2-use limit). ---
     const authHeader = req.headers.get("Authorization") || "";
     if (!authHeader.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      return new Response(JSON.stringify({ error: "Missing authorization" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -76,11 +80,16 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
     );
-    const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims?.sub || claimsData.claims.role === "anon") {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const { data: claimsData } = await supabase.auth.getClaims(token);
+    const isAuthed = !!claimsData?.claims?.sub && claimsData.claims.role !== "anon";
+    if (!isAuthed) {
+      // Anonymous: must present a stable client id so we can correlate abuse if needed.
+      const anonId = req.headers.get("x-biofit-anon-id") || "";
+      if (!anonId || anonId.length < 8 || anonId.length > 64) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const body = await req.json();
@@ -113,8 +122,10 @@ serve(async (req) => {
     const system = SYSTEM_PROMPTS[promptId as string] ?? SYSTEM_PROMPTS.general;
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    if (!GROQ_API_KEY) {
-      throw new Error("GROQ_API_KEY is not configured");
+    const CF_TOKEN = Deno.env.get("CLOUDFLARE_AI_TOKEN");
+    const CF_ACCOUNT = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
+    if (!GROQ_API_KEY && !(CF_TOKEN && CF_ACCOUNT)) {
+      throw new Error("No AI provider configured");
     }
 
     const contextAddition = userContext ? `\n\nUser context: ${userContext}` : "";
@@ -130,21 +141,76 @@ serve(async (req) => {
 
     groqMessages.push(...toGroqMessages(messages || [], image));
 
-    // Call Groq API with streaming
-    const groqResp = await fetch(GROQ_API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: image ? GROQ_VISION_MODEL : GROQ_TEXT_MODEL,
-        messages: groqMessages,
-        temperature: 0.7,
-        max_tokens: 2048,
-        stream: true,
-      }),
-    });
+    // Try Groq first; on failure (auth/limit/5xx/network), fall back to Cloudflare Workers AI.
+    let upstream: Response | null = null;
+    let usedProvider: "groq" | "cloudflare" | null = null;
+
+    if (GROQ_API_KEY) {
+      try {
+        const r = await fetch(GROQ_API_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${GROQ_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: image ? GROQ_VISION_MODEL : GROQ_TEXT_MODEL,
+            messages: groqMessages,
+            temperature: 0.7,
+            max_tokens: 2048,
+            stream: true,
+          }),
+        });
+        if (r.ok && r.body) {
+          upstream = r;
+          usedProvider = "groq";
+        } else {
+          console.warn("Groq failed, will try Cloudflare. status:", r.status);
+          try { await r.body?.cancel(); } catch {}
+        }
+      } catch (e) {
+        console.warn("Groq threw, will try Cloudflare:", e);
+      }
+    }
+
+    if (!upstream && CF_TOKEN && CF_ACCOUNT) {
+      try {
+        const cfUrl = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT}/ai/v1/chat/completions`;
+        const r = await fetch(cfUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${CF_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: image ? CF_VISION_MODEL : CF_TEXT_MODEL,
+            messages: groqMessages,
+            temperature: 0.7,
+            max_tokens: 2048,
+            stream: true,
+          }),
+        });
+        if (r.ok && r.body) {
+          upstream = r;
+          usedProvider = "cloudflare";
+        } else {
+          const errText = await r.text();
+          console.error("Cloudflare AI error:", r.status, errText.slice(0, 300));
+        }
+      } catch (e) {
+        console.error("Cloudflare AI threw:", e);
+      }
+    }
+
+    if (!upstream) {
+      return new Response(
+        JSON.stringify({ error: "All AI providers unavailable. Please try again later." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("AI provider used:", usedProvider);
+    const groqResp = upstream;
 
     if (!groqResp.ok) {
       const errorText = await groqResp.text();
