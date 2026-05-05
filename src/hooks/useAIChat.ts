@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAIGate } from "@/hooks/useAIGate";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 export function useAIChat(promptId?: string, userContext?: string) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const gate = useAIGate(`chat:${promptId || "general"}`);
 
   const sendMessage = async (input: string, extraUserContext?: string) => {
+    if (!gate.tryConsume()) return;
     const userMsg: Msg = { role: "user", content: input };
     const allMessages = [...messages, userMsg];
     setMessages(prev => [...prev, userMsg]);
@@ -18,16 +21,13 @@ export function useAIChat(promptId?: string, userContext?: string) {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        setMessages(prev => [...prev, { role: "assistant", content: "Please sign in to use the AI assistant." }]);
-        setIsLoading(false);
-        return;
-      }
+      const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${authToken}`,
+          ...gate.anonHeaders,
         },
         body: JSON.stringify({
           messages: allMessages,
