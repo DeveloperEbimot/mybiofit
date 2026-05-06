@@ -27,12 +27,22 @@ serve(async (req) => {
       });
     }
     const token = authHeader.slice("Bearer ".length);
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-    );
-    const { data: claimsData } = await supabase.auth.getClaims(token);
-    const isAuthed = !!claimsData?.claims?.sub && claimsData.claims.role !== "anon";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const publishableKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || "";
+    let isAuthed = false;
+    // Only attempt user lookup if it's not the anon/publishable key (those are not user JWTs).
+    if (token && token !== anonKey && token !== publishableKey) {
+      try {
+        const supabase = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          anonKey,
+        );
+        const { data, error } = await supabase.auth.getUser(token);
+        if (!error && data?.user?.id) isAuthed = true;
+      } catch (_e) {
+        isAuthed = false;
+      }
+    }
     if (!isAuthed) {
       const anonId = req.headers.get("x-biofit-anon-id") || "";
       if (!anonId || anonId.length < 8 || anonId.length > 64) {
