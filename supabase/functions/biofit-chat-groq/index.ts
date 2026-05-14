@@ -80,8 +80,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
     );
-    const { data: claimsData } = await supabase.auth.getClaims(token);
-    const isAuthed = !!claimsData?.claims?.sub && claimsData.claims.role !== "anon";
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+const isAuthed = !!user && user.role !== "anon";
     if (!isAuthed) {
       // Anonymous: must present a stable client id so we can correlate abuse if needed.
       const anonId = req.headers.get("x-biofit-anon-id") || "";
