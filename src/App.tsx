@@ -8,7 +8,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
 import RouteChangeTracker from "@/components/RouteChangeTracker";
-import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import AdminRoute from "@/components/AdminRoute";
 import "@/i18n";
 
@@ -20,8 +19,6 @@ const FitnessPlan = lazy(() => import("./pages/FitnessPlan"));
 const BMICalculator = lazy(() => import("./pages/BMICalculator"));
 const AIChat = lazy(() => import("./pages/AIChat"));
 const Statistics = lazy(() => import("./pages/Statistics"));
-const Ratings = lazy(() => import("./pages/Ratings"));
-const PWAInstalls = lazy(() => import("./pages/PWAInstalls"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -39,7 +36,6 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <PWAInstallPrompt />
         <BrowserRouter>
           <RouteChangeTracker />
           <AppLayout>
@@ -53,8 +49,6 @@ const App = () => (
                 <Route path="/bmi" element={<BMICalculator />} />
                 <Route path="/chat" element={<AIChat />} />
                 <Route path="/stats" element={<Statistics />} />
-                <Route path="/ratings" element={<AdminRoute><Ratings /></AdminRoute>} />
-                <Route path="/pwa-installs" element={<AdminRoute><PWAInstalls /></AdminRoute>} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />

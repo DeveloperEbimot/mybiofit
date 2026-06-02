@@ -1,7 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import RatingPopup from "@/components/RatingPopup";
 import AdSense from "@/components/AdSense";
 import {
   Camera,
@@ -87,8 +86,6 @@ export default function Index() {
 
   return (
     <div className="space-y-10 md:space-y-8 pb-10 md:pb-8">
-      <RatingPopup />
-
       {/* ─── Motivational Quote Banner ─── */}
       <section className="animate-fade-up">
         <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 p-5">
