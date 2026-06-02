@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const DietGoalSelector = lazy(() => import("@/components/DietGoalSelector"));
 const DailyTasks = lazy(() => import("@/components/DailyTasks"));
+const NutritionShortcut = lazy(() => import("@/components/NutritionShortcut"));
 
 export default function Index() {
   const { profile, updateProfile } = useUserProfile();
@@ -104,6 +105,11 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* ─── Nutrition Shortcut (logged-in only) ─── */}
+      <Suspense fallback={null}>
+        <NutritionShortcut />
+      </Suspense>
 
       {/* ─── Hero ─── */}
       <section className="relative text-center py-8 md:py-14 animate-fade-up overflow-hidden" style={{ animationDelay: "0.05s" }}>
