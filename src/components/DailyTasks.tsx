@@ -1,6 +1,6 @@
 import { useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Plus, Trash2, Dumbbell, UtensilsCrossed, ListTodo, Loader2 } from "lucide-react";
+import { Check, Plus, Trash2, Dumbbell, UtensilsCrossed, ListTodo, Loader2, CheckCheck } from "lucide-react";
 import { useDailyTasks } from "@/hooks/useDailyTasks";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -76,7 +76,7 @@ const MotionTaskItem = motion.create(TaskItem);
 
 export default function DailyTasks() {
   const { user } = useAuth();
-  const { tasks, loading, toggleTask, addCustomTask, deleteTask, progress, completedCount } = useDailyTasks();
+  const { tasks, loading, toggleTask, addCustomTask, deleteTask, completeAll, progress, completedCount } = useDailyTasks();
   const [newTask, setNewTask] = useState("");
 
   if (!user) return null;
@@ -101,8 +101,20 @@ export default function DailyTasks() {
             {completedCount}/{tasks.length} completed
           </p>
         </div>
-        <div className="w-24">
-          <Progress value={progress} className="h-2" />
+        <div className="flex items-center gap-2">
+          <div className="w-24">
+            <Progress value={progress} className="h-2" />
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={completeAll}
+            disabled={tasks.length === 0 || completedCount === tasks.length}
+            className="h-8 gap-1 text-xs"
+          >
+            <CheckCheck className="w-3.5 h-3.5" />
+            Complete all
+          </Button>
         </div>
       </div>
 
