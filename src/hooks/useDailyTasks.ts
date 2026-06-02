@@ -158,6 +158,23 @@ export function useDailyTasks() {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
+  const completeAll = async () => {
+    if (!user) return;
+    const pending = tasks.filter((t) => !t.completed);
+    if (pending.length === 0) return;
+    const ids = pending.map((t) => t.id);
+    const { error } = await supabase
+      .from("daily_tasks")
+      .update({ completed: true })
+      .in("id", ids);
+    if (error) {
+      toast({ title: "Error", description: "Failed to complete all tasks", variant: "destructive" });
+      return;
+    }
+    setTasks((prev) => prev.map((t) => ({ ...t, completed: true })));
+    toast({ title: "All tasks completed! 🎉" });
+  };
+
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
@@ -165,5 +182,5 @@ export function useDailyTasks() {
   const completedCount = tasks.filter((t) => t.completed).length;
   const progress = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
 
-  return { tasks, loading, toggleTask, addCustomTask, deleteTask, progress, completedCount };
+  return { tasks, loading, toggleTask, addCustomTask, deleteTask, completeAll, progress, completedCount };
 }
