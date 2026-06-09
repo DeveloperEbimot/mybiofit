@@ -26,6 +26,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const LanguageSelect = lazy(() => import("./pages/LanguageSelect"));
 const Settings = lazy(() => import("./pages/Settings"));
+const AdminReports = lazy(() => import("./pages/AdminReports"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/language" element={<LanguageSelect />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
