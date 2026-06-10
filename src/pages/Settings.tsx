@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, Sun, Moon, Globe, LogOut, Save, User as UserIcon, Loader2, AlertTriangle, Send } from "lucide-react";
+import { Settings as SettingsIcon, Sun, Moon, Globe, LogOut, Save, User as UserIcon, Loader2, AlertTriangle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
