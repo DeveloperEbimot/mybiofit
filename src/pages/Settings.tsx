@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, Sun, Moon, Globe, LogOut, Save, User as UserIcon, Loader2, AlertTriangle, Send } from "lucide-react";
+import { Settings as SettingsIcon, Sun, Moon, Globe, LogOut, Save, User as UserIcon, Loader2, AlertTriangle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,8 +24,6 @@ export default function Settings() {
   const [avatar, setAvatar] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [reportText, setReportText] = useState("");
-  const [submittingReport, setSubmittingReport] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -52,34 +49,7 @@ export default function Settings() {
     else toast.success("Settings saved!");
   };
 
-  const submitReport = async () => {
-    if (!user) {
-      toast.error("Please sign in to report a problem");
-      return;
-    }
-    const desc = reportText.trim();
-    if (desc.length < 10) {
-      toast.error("Please describe the problem (at least 10 characters)");
-      return;
-    }
-    if (desc.length > 2000) {
-      toast.error("Description is too long (max 2000 characters)");
-      return;
-    }
-    setSubmittingReport(true);
-    const { error } = await supabase.from("problem_reports").insert({
-      user_id: user.id,
-      description: desc,
-      email: user.email ?? null,
-    });
-    setSubmittingReport(false);
-    if (error) {
-      toast.error("Couldn't send your report. Please try again.");
-    } else {
-      toast.success("Thanks! Your report has been sent.");
-      setReportText("");
-    }
-  };
+  const reportUrl = `mailto:biofit096@gmail.com?subject=${encodeURIComponent("BioFit Problem Report")}&body=${encodeURIComponent("Hi BioFit team,\n\nI encountered the following problem:\n\n")}`;
 
   if (!loaded) {
     return (
@@ -220,23 +190,15 @@ export default function Settings() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Label htmlFor="report">Describe what went wrong</Label>
-          <Textarea
-            id="report"
-            value={reportText}
-            onChange={(e) => setReportText(e.target.value)}
-            placeholder="Tell us what happened, what you expected, and any steps to reproduce the issue…"
-            rows={5}
-            maxLength={2000}
-          />
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Your report goes straight to the BioFit team.</span>
-            <span>{reportText.length}/2000</span>
-          </div>
-          <Button onClick={submitReport} disabled={submittingReport} className="w-full gap-2">
-            {submittingReport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            Send report
-          </Button>
+          <p className="text-sm text-muted-foreground">
+            Found a bug or have feedback? Send us an email and we’ll get back to you.
+          </p>
+          <a href={reportUrl} className="block">
+            <Button className="w-full gap-2">
+              <Mail className="w-4 h-4" />
+              Send email to support
+            </Button>
+          </a>
         </CardContent>
       </Card>
     </div>
