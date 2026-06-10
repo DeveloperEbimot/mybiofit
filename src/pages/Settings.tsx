@@ -24,8 +24,6 @@ export default function Settings() {
   const [avatar, setAvatar] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [reportText, setReportText] = useState("");
-  const [submittingReport, setSubmittingReport] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -192,23 +190,15 @@ export default function Settings() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <Label htmlFor="report">Describe what went wrong</Label>
-          <Textarea
-            id="report"
-            value={reportText}
-            onChange={(e) => setReportText(e.target.value)}
-            placeholder="Tell us what happened, what you expected, and any steps to reproduce the issue…"
-            rows={5}
-            maxLength={2000}
-          />
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Your report goes straight to the BioFit team.</span>
-            <span>{reportText.length}/2000</span>
-          </div>
-          <Button onClick={submitReport} disabled={submittingReport} className="w-full gap-2">
-            {submittingReport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            Send report
-          </Button>
+          <p className="text-sm text-muted-foreground">
+            Found a bug or have feedback? Send us an email and we’ll get back to you.
+          </p>
+          <a href={reportUrl} className="block">
+            <Button className="w-full gap-2">
+              <Mail className="w-4 h-4" />
+              Send email to support
+            </Button>
+          </a>
         </CardContent>
       </Card>
     </div>
