@@ -51,34 +51,7 @@ export default function Settings() {
     else toast.success("Settings saved!");
   };
 
-  const submitReport = async () => {
-    if (!user) {
-      toast.error("Please sign in to report a problem");
-      return;
-    }
-    const desc = reportText.trim();
-    if (desc.length < 10) {
-      toast.error("Please describe the problem (at least 10 characters)");
-      return;
-    }
-    if (desc.length > 2000) {
-      toast.error("Description is too long (max 2000 characters)");
-      return;
-    }
-    setSubmittingReport(true);
-    const { error } = await supabase.from("problem_reports").insert({
-      user_id: user.id,
-      description: desc,
-      email: user.email ?? null,
-    });
-    setSubmittingReport(false);
-    if (error) {
-      toast.error("Couldn't send your report. Please try again.");
-    } else {
-      toast.success("Thanks! Your report has been sent.");
-      setReportText("");
-    }
-  };
+  const reportUrl = `mailto:biofit096@gmail.com?subject=${encodeURIComponent("BioFit Problem Report")}&body=${encodeURIComponent("Hi BioFit team,\n\nI encountered the following problem:\n\n")}`;
 
   if (!loaded) {
     return (
